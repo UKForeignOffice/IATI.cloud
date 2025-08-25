@@ -6,7 +6,10 @@ import pysolr
 import requests
 from django.conf import settings
 
-from direct_indexing.metadata.dataset import aida_drop_dataset, aida_index_dataset, index_datasets_and_dataset_metadata
+from direct_indexing.metadata.dataset import (
+    aida_drop_dataset, aida_index_dataset, fcdo_drop_activity, fcdo_drop_dataset, fcdo_enable_dataset,
+    fcdo_reindex_dataset, index_datasets_and_dataset_metadata
+)
 from direct_indexing.metadata.publisher import index_publisher_metadata
 
 
@@ -83,6 +86,30 @@ def aida_index(dataset, publisher, ds_name, ds_url, draft=False):
 def aida_drop(ds_id, draft):
     result, code = aida_drop_dataset(ds_id, draft)
     logging.info(f"aida_drop:: result: {result}")
+    return result, code
+
+
+def fcdo_activity_drop(iati_id):
+    result, code = fcdo_drop_activity(iati_id)
+    logging.info(f"fcdo activity drop:: result: {result}")
+    return result, code
+
+
+def fcdo_dataset_drop(ds_id):
+    result, code = fcdo_drop_dataset(ds_id)
+    logging.info(f"fcdo dataset disable:: result: {result}")
+    return result, code
+
+
+def fcdo_dataset_enable(ds_id):
+    result, code = fcdo_enable_dataset(ds_id)
+    logging.info(f"fcdo dataset enable:: result: {result}")
+    return result, code
+
+
+def fcdo_dataset_reindex(ds_id, url):
+    result, code = fcdo_reindex_dataset(ds_id, url)
+    logging.info(f"fcdo dataset reindex:: result: {result}")
     return result, code
 
 

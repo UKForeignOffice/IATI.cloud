@@ -131,6 +131,125 @@ def aida_drop_dataset(dataset_id, draft=False):
     return "Dataset deleted successfully", 200
 
 
+def fcdo_drop_activity(iati_id):
+    try:
+        core_list = ['activity', 'fcdo_budget']
+        for core in core_list:
+            solr = pysolr.Solr(f'{settings.SOLR_URL}/{core}', always_commit=True, timeout=300)
+            solr.delete(q=f'iati-identifier:"{iati_id}"')
+    except pysolr.SolrError:
+        return "Apologies, but the activity could not be fully deleted, please contact support", 500
+    return "Activity deleted succesfully", 200
+
+
+def fcdo_drop_dataset(ds_id):
+    try:
+        # drop data from cores
+        core_list = ['activity', 'fcdo_budget']
+        for core in core_list:
+            solr = pysolr.Solr(f'{settings.SOLR_URL}/{core}', always_commit=True, timeout=300)
+            solr.delete(q=f'dataset.id:"{ds_id}"')
+        # update dataset core
+        solr = pysolr.Solr(f'{settings.SOLR_URL}/dataset', always_commit=True, timeout=300)
+        find_data = solr.search(f'id:"{ds_id}"')
+        if find_data:
+            update_data = {
+                "id": ds_id,
+                "iati_cloud_indexed": {"set": False},
+                "iati_cloud_should_be_indexed": {"set": False},
+                "iati_cloud_fcdo_disabled": {"set": True},
+            }
+            solr.add([update_data])
+    except pysolr.SolrError:
+        return "Apologies, but the dataset could not be fully deleted, please contact support", 500
+    return "Dataset deleted successfully", 200
+
+
+def fcdo_enable_dataset(ds_id):
+    try:
+        # update dataset core
+        solr = pysolr.Solr(f'{settings.SOLR_URL}/dataset', always_commit=True, timeout=300)
+        find_data = solr.search(f'id:"{ds_id}"')
+        if find_data:
+            update_data = {
+                "id": ds_id,
+                "iati_cloud_should_be_indexed": {"set": True},
+                "iati_cloud_fcdo_disabled": {"set": None},
+                "resources.hash": {"set": ["UPDATE"]}
+            }
+            solr.add([update_data])
+    except pysolr.SolrError:
+        return "Apologies, but the dataset could not be enabled, please contact support", 500
+    return "Dataset enabled successfully", 200
+
+
+def fcdo_reindex_dataset(ds_id, url):
+    try:
+        solr = pysolr.Solr(f'{settings.SOLR_URL}/dataset', always_commit=True, timeout=300)
+        find_data = solr.search(f'id:"{ds_id}"')
+        # get the first result's `name` and `resources.url`
+        if not find_data:
+            return "No dataset with that ID was found", 404
+        doc = find_data.docs[0]
+        dataset_name = doc.get("name", None)
+        resource_url = doc.get("resources.url", None)
+        org_name = doc.get("organization.name", None)
+        try:
+            fcdo_reindex_dataset_download(url, resource_url, org_name, dataset_name)
+        except requests.exceptions.RequestException as e:
+            return f"Failed to download dataset {dataset_name}.", 500
+        try:
+            dataset = fcdo_reindex_dataset_metadata(org_name, dataset_name)
+        except Exception:
+            return "Failed to retrieve correct metadata for the provided dataset ID", 500
+        dataset_indexing_result, result, _ = dataset_processing.fun(dataset, update=True)
+        if result == INDEX_SUCCESS and dataset_indexing_result == INDEX_SUCCESS:
+            return result, 200
+        elif dataset_indexing_result == 'Dataset invalid':
+            return dataset_indexing_result, 200
+        else:
+            return "Dataset was not indexed", 200
+    except pysolr.SolrError:
+        return "Apologies, but the dataset could not be reindexed, please contact support", 500
+    except Exception:
+        return "Apologies, an unknown error has occurred, please contact support and provide as much detail as possible.", 500
+
+
+def fcdo_reindex_dataset_download(url, resource_url, org_name, dataset_name):
+    dl_url = url if url else resource_url[0]
+    # create the path to where the file should be stored
+    base_path = os.path.abspath(os.path.join(
+        os.path.dirname(__file__),
+        '..',
+        'data_sources/datasets/iati-data-main'
+    ))
+    logging.info("BASE PATH: %s", base_path)
+    publisher_path = os.path.join(base_path, "data", org_name)
+    file_path = os.path.join(publisher_path, f"{dataset_name}.xml")
+    response = requests.get(dl_url, stream=True)
+    response.raise_for_status()
+    with open(file_path, 'wb') as file:
+        for chunk in response.iter_content(chunk_size=8192):
+            file.write(chunk)
+    logging.info(f"Dataset downloaded successfully: {file_path}")
+
+
+def fcdo_reindex_dataset_metadata(org_name, dataset_name):
+    metadata_base_path = os.path.abspath(os.path.join(
+        os.path.dirname(__file__),
+        '..',
+        'data_sources/datasets/iati-data-main'
+    ))
+    logging.info("BASE PATH: %s", metadata_base_path)
+    metadata_publisher_path = os.path.join(metadata_base_path, "metadata", org_name)
+    os.makedirs(metadata_publisher_path, exist_ok=True)
+    metadata_path = os.path.join(metadata_publisher_path, f"{dataset_name}.json")
+    # json read metadata_path as dataset
+    with open(metadata_path, "r", encoding="utf-8") as f:
+        dataset = json.load(f)
+    return dataset
+
+
 def index_datasets_and_dataset_metadata(update, force_update, fresh=settings.FRESH, drop=False):
     """
     Steps:
@@ -208,7 +327,7 @@ def load_codelists():
 def _get_existing_datasets():
     url = settings.SOLR_DATASET + (
         '/select?q=*:*'
-        ' AND id:*&rows=100000&wt=json&fl=resources.hash,id,extras.filetype,iati_cloud_aida_sourced'
+        ' AND id:*&rows=100000&wt=json&fl=resources.hash,id,extras.filetype,iati_cloud_aida_sourced,iati_cloud_fcdo_disabled'
     )
     data = requests.get(url).json()['response']['docs']
     datasets = {}
@@ -219,7 +338,10 @@ def _get_existing_datasets():
         _filetype = ""
         if 'extras.filetype' in doc:
             _filetype = doc['extras.filetype']
-        datasets[doc['id']] = {'hash': _hash, 'filetype': _filetype}
+        _fcdo_disabled = False
+        if 'iati_cloud_fcdo_disabled' in doc:
+            _fcdo_disabled = True
+        datasets[doc['id']] = {'hash': _hash, 'filetype': _filetype, 'fcdo_disabled': _fcdo_disabled}
     return datasets
 
 
@@ -234,7 +356,7 @@ def prepare_update(dataset_metadata):
     ]
     changed_datasets = [
         d for d in old_datasets if
-        ('' if 'hash' not in d['resources'][0] else d['resources'][0]['hash']) != existing_datasets[d['id']]['hash']
+        ('' if 'hash' not in d['resources'][0] else d['resources'][0]['hash']) != existing_datasets[d['id']]['hash'] and not existing_datasets[d['id']]['fcdo_disabled']
     ]
     updated_datasets = new_datasets + changed_datasets
     updated_datasets_bools = [False for _ in new_datasets] + [True for _ in changed_datasets]

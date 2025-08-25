@@ -235,21 +235,28 @@ def clean_known_issues(data):
 
 
 def _clean_known_issues_types(data):
-    """
-    Items are integers from 1 to 13, but some are not in this range.
-    Valid transaction type codes are integers from 1 to 13. Normalize them to 1.
-    """
-    def _normalize_item(item):
-        try:
-            item = int(item)
-        except (ValueError, TypeError):
-            return 1
-        return item if 1 <= item <= 13 else 1
-
-    for field in ("transaction.value-gbp-type", "transaction.value-usd-type"):
-        if isinstance(data.get(field), list):
-            data[field] = [_normalize_item(item) for item in data[field]]
+    # Fix for transaction.value-gbp-type and transaction.value-usd-type
+    for field in ['transaction.value-gbp-type', 'transaction.value-usd-type']:
+        if field in data and isinstance(data[field], list):
+            # Per instructions, replace any values not in range(1, 14) with 1.
+            # Valid transaction type codes are integers from 1 to 13.
+            data[field] = _fix_ints(data, field)
     return data
+
+
+def _fix_ints(data, field):
+    cleaned_list = []
+    for item in data[field]:
+        if not isinstance(item, int):
+            try:
+                item = int(item)
+            except Exception:
+                pass
+        if isinstance(item, int) and 1 <= item <= 13:
+            cleaned_list.append(item)
+        else:
+            cleaned_list.append(1)
+    return cleaned_list
 
 
 def _reformat_date_str(date_str):
@@ -270,7 +277,7 @@ def _clean_known_issues_dates(data):
         else:
             data['budget']['period-start']['iso-date'] = _reformat_date_str(value)
 
-    if 'result' in data and 'document-link' in data['result'] and 'document-date' in data['result']['document-link'] and 'iso-date' in data['result']['document-link']['document-date']:
+    if 'result' in data and 'document-link' in data['result'] and 'document-date' in data['result']['document-link'] and 'iso-date' in data['result']['document-link']['document-date']:  # NOQA: E501
         value = data['result']['document-link']['document-date']['iso-date']
         if isinstance(value, list):
             data['result']['document-link']['document-date']['iso-date'] = [_reformat_date_str(d) for d in value]

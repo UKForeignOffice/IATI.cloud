@@ -17,12 +17,18 @@ from django.contrib import admin
 from django.urls import path
 from django_celery_beat.models import ClockedSchedule, SolarSchedule
 
-from .views import aida_drop, aida_index
+from .views import (
+    aida_drop, aida_index, fcdo_activity_delete, fcdo_dataset_delete, fcdo_dataset_enabled, fcdo_dataset_force_reindex
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('aida/index', aida_index),  # Requires a POST request with JSON body
-    path('aida/drop', aida_drop)  # Requires a POST request with JSON body
+    path('aida/drop', aida_drop),  # Requires a POST request with JSON body
+    path('fcdo/activity/delete', fcdo_activity_delete),  # Requires a POST request with JSON body
+    path('fcdo/dataset/disable', fcdo_dataset_delete),  # Requires a POST request with JSON body
+    path('fcdo/dataset/enable', fcdo_dataset_enabled),  # Requires a POST request with JSON body
+    path('fcdo/dataset/reindex', fcdo_dataset_force_reindex)  # Requires a POST request with JSON body
 ]
 
 admin.site.unregister([

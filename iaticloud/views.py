@@ -8,6 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 from direct_indexing.direct_indexing import aida_drop as aida_direct_drop
 from direct_indexing.direct_indexing import aida_index as aida_direct_index
+from direct_indexing.direct_indexing import (
+    fcdo_activity_drop, fcdo_dataset_drop, fcdo_dataset_enable, fcdo_dataset_reindex
+)
 from direct_indexing.tasks import aida_async_drop, aida_async_index
 
 ISO_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -245,3 +248,120 @@ def _make_dataset(ds_id, publisher, ds_name, ds_url):
     except KeyError as e:
         logging.error(f"KeyError in _make_dataset: {e}")
         raise e
+
+
+# FCDO Custom views
+# fcdo_activity_delete, fcdo_dataset_delete, fcdo_dataset_disable, fcdo_dataset_enable, fcdo_dataset_force_reindex
+
+@csrf_exempt
+def fcdo_activity_delete(request):
+    """
+    Endpoint to drop a specific activity.
+
+    Expects a JSON body with the following fields:
+    - token (required): The secret token to authenticate the request
+    - id: the iati-identifier of the activity.
+    return: a JSON response with the status of the dropping process
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request, must be POST"}, status=400)
+
+    # Get the data from the request body
+    data = json.loads(request.body)
+    token = data.get("token", "")
+    if token != settings.SECRET_KEY:
+        return JsonResponse({"error": "Invalid token"}, status=403)
+
+    iati_id = data.get("id", "")
+    if not iati_id:
+        return JsonResponse({"error": "Missing required `id`"}, status=400)
+
+    # Add a celery task to index the provided dataset.
+    status, code = fcdo_activity_drop(iati_id)
+    return JsonResponse({"status": status}, status=code)
+
+
+@csrf_exempt
+def fcdo_dataset_delete(request):
+    """
+    Endpoint to drop a specific dataset.
+
+    Expects a JSON body with the following fields:
+    - token (required): The secret token to authenticate the request
+    - id: the identifier of the dataset.
+    return: a JSON response with the status of the dropping process
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request, must be POST"}, status=400)
+
+    # Get the data from the request body
+    data = json.loads(request.body)
+    token = data.get("token", "")
+    if token != settings.SECRET_KEY:
+        return JsonResponse({"error": "Invalid token"}, status=403)
+
+    ds_id = data.get("id", "")
+    if not ds_id:
+        return JsonResponse({"error": "Missing required `id`"}, status=400)
+
+    # Add a celery task to index the provided dataset.
+    status, code = fcdo_dataset_drop(ds_id)
+    return JsonResponse({"status": status}, status=code)
+
+
+@csrf_exempt
+def fcdo_dataset_enabled(request):
+    """
+    Endpoint to enable a specific dataset.
+
+    Expects a JSON body with the following fields:
+    - token (required): The secret token to authenticate the request
+    - id: the identifier of the dataset.
+    return: a JSON response with the status of the dropping process
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request, must be POST"}, status=400)
+
+    # Get the data from the request body
+    data = json.loads(request.body)
+    token = data.get("token", "")
+    if token != settings.SECRET_KEY:
+        return JsonResponse({"error": "Invalid token"}, status=403)
+
+    ds_id = data.get("id", "")
+    if not ds_id:
+        return JsonResponse({"error": "Missing required `id`"}, status=400)
+
+    # Add a celery task to index the provided dataset.
+    status, code = fcdo_dataset_enable(ds_id)
+    return JsonResponse({"status": status}, status=code)
+
+
+@csrf_exempt
+def fcdo_dataset_force_reindex(request):
+    """
+    Endpoint to force reindex a specific dataset.
+
+    Expects a JSON body with the following fields:
+    - token (required): The secret token to authenticate the request
+    - id: the identifier of the dataset.
+    return: a JSON response with the status of the dropping process
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request, must be POST"}, status=400)
+
+    # Get the data from the request body
+    data = json.loads(request.body)
+    token = data.get("token", "")
+    if token != settings.SECRET_KEY:
+        return JsonResponse({"error": "Invalid token"}, status=403)
+
+    ds_id = data.get("id", "")
+    if not ds_id:
+        return JsonResponse({"error": "Missing required `id`"}, status=400)
+
+    url = data.get("url", "")
+
+    # Add a celery task to index the provided dataset.
+    status, code = fcdo_dataset_reindex(ds_id, url)
+    return JsonResponse({"status": status}, status=code)
