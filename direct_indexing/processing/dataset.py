@@ -10,7 +10,7 @@ from django.conf import settings
 from pysolr import Solr
 from xmljson import badgerfish as bf
 
-from direct_indexing.cleaning.dataset import recursive_attribute_cleaning
+from direct_indexing.cleaning.dataset import clean_known_issues, recursive_attribute_cleaning
 from direct_indexing.cleaning.metadata import clean_dataset_metadata
 from direct_indexing.custom_fields import custom_fields, organisation_custom_fields
 from direct_indexing.custom_fields.models import codelists
@@ -145,8 +145,8 @@ def index_dataset(internal_url, dataset_filetype, codelist, currencies, dataset_
             draft
         )
         if json_path:
+            logging.info("Indexing Activity data")
             result = index_to_core(core_url, json_path, remove=True)
-            logging.info(f'result of indexing {result}')
             if result == 'Successfully indexed':
                 return True, result, should_be_indexed
             return False, "Unable to index the processed dataset.", False
@@ -186,6 +186,7 @@ def convert_and_save_xml_to_processed_json(filepath, filetype, codelist, currenc
         return data_found, should_be_indexed, "Data was not present in the data dump."
     # Clean the dataset
     data = recursive_attribute_cleaning(data)
+    data = clean_known_issues(data)
 
     # Prepare the json path
     json_path = json_filepath(filepath)
@@ -308,6 +309,7 @@ def index_subtypes(json_path, subtypes, draft=False):
         if subtype == "transaction":
             # if subtype is transaction, we do not submit it for indexing, due to exclusive usage of transaction_trimmed
             continue
+        logging.info(f"Indexing subtype: {subtype}")
         if draft:
             solr_url = activity_subtypes.AVAILABLE_DRAFT_SUBTYPES[subtype]
         else:
