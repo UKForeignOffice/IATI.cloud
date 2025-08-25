@@ -209,6 +209,28 @@ def clean_known_issues(data):
     if 'recipient-org-budget' in data and 'value' in data['recipient-org-budget'] and data['recipient-org-budget']['value'] == ' ':
         data['recipient-org-budget']['value'] = 0
 
+    data = _clean_known_issues_types(data)
+
+    # Fix for malformed date strings
+    date_fields_to_fix = [
+        'budget.period-start.iso-date',
+        'result.document-link.document-date.iso-date',
+        'activity-date.start-planned',
+        'activity-date.iso-date',
+    ]
+    for field in date_fields_to_fix:
+        if field in data:
+            value = data[field]
+            if isinstance(value, list):
+                data[field] = [_reformat_date_str(d) for d in value]
+            else:
+                data[field] = _reformat_date_str(value)
+
+    data = _clean_known_issues_dates(data)
+    return data
+
+
+def _clean_known_issues_types(data):
     # Fix for transaction.value-gbp-type and transaction.value-usd-type
     for field in ['transaction.value-gbp-type', 'transaction.value-usd-type']:
         if field in data and isinstance(data[field], list):
@@ -226,32 +248,20 @@ def clean_known_issues(data):
                 else:
                     cleaned_list.append(1)
             data[field] = cleaned_list
+    return data
 
-    # Fix for malformed date strings
-    date_fields_to_fix = [
-        'budget.period-start.iso-date',
-        'result.document-link.document-date.iso-date',
-        'activity-date.start-planned',
-        'activity-date.iso-date',
-    ]
 
-    def _reformat_date_str(date_str):
-        # Fix for date strings like 'YYYY-MM-DD+HH:MM' by replacing '+' with 'T'.
-        # This converts it to a valid ISO 8601 format.
-        # We check for 'T' not in string to avoid re-formatting strings that
-        # already have a time designator and a timezone offset (e.g. '...T...+...').
-        if isinstance(date_str, str) and '+' in date_str and 'T' not in date_str:
-            return date_str.replace('+', 'T', 1)
-        return date_str
+def _reformat_date_str(date_str):
+    # Fix for date strings like 'YYYY-MM-DD+HH:MM' by replacing '+' with 'T'.
+    # This converts it to a valid ISO 8601 format.
+    # We check for 'T' not in string to avoid re-formatting strings that
+    # already have a time designator and a timezone offset (e.g. '...T...+...').
+    if isinstance(date_str, str) and '+' in date_str and 'T' not in date_str:
+        return date_str.replace('+', 'T', 1)
+    return date_str
 
-    for field in date_fields_to_fix:
-        if field in data:
-            value = data[field]
-            if isinstance(value, list):
-                data[field] = [_reformat_date_str(d) for d in value]
-            else:
-                data[field] = _reformat_date_str(value)
 
+def _clean_known_issues_dates(data):
     if 'budget' in data and 'period-start' in data['budget'] and 'iso-date' in data['budget']['period-start']:
         value = data['budget']['period-start']['iso-date']
         if isinstance(value, list):
