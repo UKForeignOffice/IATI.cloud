@@ -2,6 +2,7 @@
 # Solr mounted docker directory
 solr_mount_dir
 solr_data
+solr_follower_data
 
 # # General gitignore
 # Environments
@@ -18,6 +19,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+# local development
+test.py
+test.sh
 
 # Celery
 celerybeat-schedule
