@@ -42,8 +42,9 @@ def aida_index(request):
     ds_url = data.get("url", None)
     ds_id = data.get("id", None)
 
-    if not publisher or not ds_name or not ds_url:
-        return JsonResponse({"error": "Missing required fields"}, status=400)
+    missing = [f for f, v in {"publisher": publisher, "ds_name": ds_name, "ds_url": ds_url}.items() if not v]
+    if missing:
+        return JsonResponse({"error": f"Missing required fields: {', '.join(missing)}!"}, status=400)
 
     # No dataset ID provided, we generate one instead.
     if not ds_id:
