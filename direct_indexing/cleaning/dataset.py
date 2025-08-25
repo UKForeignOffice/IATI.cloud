@@ -202,12 +202,16 @@ def clean_known_issues(data):
     Args:
         data (dict): activity data
     """
+    # constants to reduce duplicate literals
+    robv = 'recipient-org-budget.value'
+    rob = 'recipient-org-budget'
+    v = 'value'
     # Fix for recipient-org-budget.value = " "
-    if 'recipient-org-budget.value' in data and data['recipient-org-budget.value'] == ' ':
-        data['recipient-org-budget.value'] = 0
+    if robv in data and data[robv] == ' ':
+        data[robv] = 0
     # In case it is not one object
-    if 'recipient-org-budget' in data and 'value' in data['recipient-org-budget'] and data['recipient-org-budget']['value'] == ' ':
-        data['recipient-org-budget']['value'] = 0
+    if rob in data and v in data[rob] and data[rob][v] == ' ':
+        data[rob][v] = 0
 
     data = _clean_known_issues_types(data)
 
@@ -231,23 +235,20 @@ def clean_known_issues(data):
 
 
 def _clean_known_issues_types(data):
-    # Fix for transaction.value-gbp-type and transaction.value-usd-type
-    for field in ['transaction.value-gbp-type', 'transaction.value-usd-type']:
-        if field in data and isinstance(data[field], list):
-            # Per instructions, replace any values not in range(1, 14) with 1.
-            # Valid transaction type codes are integers from 1 to 13.
-            cleaned_list = []
-            for item in data[field]:
-                if not isinstance(item, int):
-                    try:
-                        item = int(item)
-                    except Exception:
-                        pass
-                if isinstance(item, int) and 1 <= item <= 13:
-                    cleaned_list.append(item)
-                else:
-                    cleaned_list.append(1)
-            data[field] = cleaned_list
+    """
+    Items are integers from 1 to 13, but some are not in this range.
+    Valid transaction type codes are integers from 1 to 13. Normalize them to 1.
+    """
+    def _normalize_item(item):
+        try:
+            item = int(item)
+        except (ValueError, TypeError):
+            return 1
+        return item if 1 <= item <= 13 else 1
+
+    for field in ("transaction.value-gbp-type", "transaction.value-usd-type"):
+        if isinstance(data.get(field), list):
+            data[field] = [_normalize_item(item) for item in data[field]]
     return data
 
 
