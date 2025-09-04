@@ -200,6 +200,9 @@ def convert_and_save_xml_to_processed_json(filepath, filetype, codelist, currenc
     if not success:
         return success, should_be_indexed, message
 
+    if not settings.FCDO_INSTANCE:
+        dataset_subtypes(filetype, data, json_path, draft)
+
     logging.info(f'-- Saving to {json_path}')
     try:
         with open(json_path, 'w') as json_file:
@@ -208,9 +211,6 @@ def convert_and_save_xml_to_processed_json(filepath, filetype, codelist, currenc
         logging.info(f'-- Error saving to {json_path}, failed')
         logging.error(f'Error writing to {json_path}: type: {type(e)} -- stack: {e}')
         return False, should_be_indexed, "Processed data could not be saved as JSON."
-
-    if not settings.FCDO_INSTANCE:
-        dataset_subtypes(filetype, data, json_path, draft)
 
     return json_path, should_be_indexed, "Success"
 
@@ -306,8 +306,9 @@ def index_subtypes(json_path, subtypes, draft=False):
     :return: None
     """
     for subtype in subtypes:
-        if subtype == "transaction":
-            # if subtype is transaction, we do not submit it for indexing, due to exclusive usage of transaction_trimmed
+        if subtype in ["transaction", "budget"]:
+            # if subtype is transaction or budget, we do not submit it for indexing,
+            # due to exclusive usage of transaction_trimmed and budget_split_by_sector
             continue
         logging.info(f"Indexing subtype: {subtype}")
         if draft:
