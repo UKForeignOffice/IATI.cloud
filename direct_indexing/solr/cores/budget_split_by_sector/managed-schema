@@ -470,6 +470,7 @@
 
   <!-- activity.iati id 1..1 -->
   <field name="iati-identifier" type="non_case_sensitive"/>
+  <field name="last-updated-datetime" type="pdate"/>
 
   <!-- Budget split by sector content-->
   <field name="sector.code" type="string" multiValued="false" indexed="true" required="false" stored="true"/>  <!-- multivalued in case the tag is the reason the budget is reported as SDG -->

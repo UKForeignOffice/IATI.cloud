@@ -302,6 +302,7 @@ def _trim_budgets(budgets):
     _budgets = []
     for b in budgets:
         iati_id = b.get('iati-identifier', None)
+        last_updated_datetime = b.get('last-updated-datetime', None)
         sector = _trim_field(b.get('sector', None), ['code', 'vocabulary'])
         recipient_country = _trim_field(b.get('recipient-country', None), ['code'])
         budget = b.get('budget', None)
@@ -330,6 +331,7 @@ def _trim_budgets(budgets):
         policy_marker = _trim_field(b.get('policy-marker', None), ['code'])
         _trimmed = {
             'iati-identifier': iati_id,
+            'last-updated-datetime': last_updated_datetime,
             'sector': sector,
             'recipient-country': recipient_country,
             'budget': budget,
