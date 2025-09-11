@@ -544,6 +544,7 @@
   <field name="policy-marker.combined" type="text_general"/>
   <field name="sector.percentage" type="pdoubles"/>
   <field name="transaction.recipient-region.code" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
+  <field name="recipient-region.name" type="text_general"/>
 
   <!-- Additional dataset fields -->
   <field name="dataset.id" type="text_general_single" indexed="true" stored="true" />

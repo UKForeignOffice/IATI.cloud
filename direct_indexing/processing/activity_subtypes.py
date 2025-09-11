@@ -193,6 +193,7 @@ def _trim_transactions(transactions):
             participating_org = _trim_field(t.get('participating-org', None), ['ref', 'narrative'])
             title = _trim_field(t.get('title', None), ['narrative'])
             recipient_country_name = t.get('recipient-country.name', None)
+            recipient_region_name = t.get('recipient-region.name', None)
             dataset_id = t.get('dataset.id', None)
             dataset_name = t.get('dataset.name', None)
             dataset_resources_hash = t.get('dataset.resources.hash', None)
@@ -230,6 +231,7 @@ def _trim_transactions(transactions):
                 'participating-org': participating_org,
                 'title': title,
                 'recipient-country.name': recipient_country_name,
+                'recipient-region.name': recipient_region_name,
                 'dataset.id': dataset_id,
                 'dataset.name': dataset_name,
                 'dataset.resources.hash': dataset_resources_hash,
