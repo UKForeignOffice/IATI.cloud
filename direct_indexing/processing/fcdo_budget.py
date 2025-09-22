@@ -88,7 +88,7 @@ def _fcdo_budget_process_activity(activity, budgets, all_fcdo_budgets, currencie
     recipient_region = activity.get('recipient-region', [])  # Can be empty
     recipient_region = recipient_region if isinstance(recipient_region, list) else [recipient_region]
     recipient = set_default_percentage(recipient_country + recipient_region)
-    reporting_org_ref = activity.get('reporting-org.ref', '')  # Should never be empty
+    reporting_org_ref = activity.get('reporting-org', {}).get('ref')  # Should never be empty
     # Can be empty, if empty, sector is reported at transaction level,
     # but in that case, is not relevant to the budget
     sector = activity.get('sector', [])
@@ -103,8 +103,14 @@ def _fcdo_budget_process_activity(activity, budgets, all_fcdo_budgets, currencie
         if not budget_gbp:
             # Budget is not valid, skipping
             continue
-        budget_start = budget.get('period-start', activity.get('start-iso-date', None))
-        budget_end = budget.get('period-end', activity.get('end-iso-date', None))
+        b_start_l = budget.get('period-start', {})
+        if isinstance(b_start_l, list):
+            b_start_l = b_start_l[0]
+        budget_start = b_start_l.get("iso-date", None)
+        b_end_l = budget.get('period-end', {})
+        if isinstance(b_end_l, list):
+            b_end_l = b_end_l[0]
+        budget_end = b_end_l.get("iso-date", None)
         budget_type = budget.get('type', 1)
         if not budget_start or not budget_end:
             # Budget does not have a start or end date, even through it is a required field. Skip it.
@@ -284,17 +290,25 @@ def _create_fcdo_budget_item(iati_id, hierarchy, db, budget_type, budget_start, 
         item['recipient-region.code'] = recip_code
         item['recipient-region.name'] = REGIONS.get(recip_code, '')
     item["reporting-org.ref"] = reporting_org_ref
+
+    # Sector codes, if dac5, dac3 should also be reported and vice versa
     sector_code = db.get('sector_code', '')
-    dac3_name = DAC3.get(sector_code, '')
-    dac5_name = DAC5.get(sector_code, '')
-    if sector_code in DAC5:
-        item['dac5-sector.code'] = sector_code
+    dac5_s_c = sector_code
+    # if this sector code is a dac3, add default 10, which is the first dac5 version of the dac3 sector
+    if sector_code < 1000:
+        dac5_s_c = sector_code*100+10
+    dac5_name = DAC5.get(dac5_s_c, '')
+    if dac5_s_c in DAC5:
+        item['dac5-sector.code'] = dac5_s_c
         item['dac5-sector.name'] = dac5_name
+    # Take the first 3 characters from any given sector code, if dac5, becomes dac3, if dac3, stays dac3
+    sector_code = int(str(sector_code)[:3])
+    dac3_name = DAC3.get(sector_code, '')
     if sector_code in DAC3:
         item['dac3-sector.code'] = sector_code
         item['dac3-sector.name'] = dac3_name
     item['sector.code'] = sector_code
-    item['sector.narrative'] = dac3_name if dac3_name else dac5_name  # if both are empty, defaulkts to empty
+    item['sector.narrative'] = dac3_name if dac3_name else dac5_name  # if both are empty, defaults to empty
     item["budget.value-gbp"] = round(db.get('amount', 0), 2)
     item["budget.type"] = budget_type
     item["budget.period-start.iso-date"] = budget_start

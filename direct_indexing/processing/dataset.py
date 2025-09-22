@@ -220,9 +220,6 @@ def convert_and_save_xml_to_processed_json(filepath, filetype, codelist, currenc
         logging.error(f'Error writing to {json_path}: type: {type(e)} -- stack: {e}')
         return False, should_be_indexed, "Processed data could not be saved as JSON."
 
-    if not settings.FCDO_INSTANCE:
-        dataset_subtypes(filetype, data, json_path, draft)
-
     json_path, success_state = _fcdo_budget(filetype, data, json_path, currencies)
 
     return json_path, should_be_indexed, success_state
