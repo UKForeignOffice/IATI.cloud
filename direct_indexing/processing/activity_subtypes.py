@@ -654,7 +654,7 @@ def _trim_sdg_item_transaction(_item):
         if 'provider_org' in _item:
             del _item['provider-org']
         _item['receiver-org'] = _trim_field(_item.get('receiver-org', None), ['ref'])
-        _item['sector'] = _trim_field(_item.get('sector', None), ['vocabulary'])
+        _item['sector'] = _trim_field(_item.get('sector', None), ['code', 'vocabulary'])
     except Exception as e:
         logging.error(f"_trim_sdg_item_transaction::error {e}")
         raise e

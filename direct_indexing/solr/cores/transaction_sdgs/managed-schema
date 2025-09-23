@@ -491,6 +491,7 @@
   <field name="transaction.flow-type.code" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
   <field name="transaction.tied-status.code" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
   <field name="transaction.recipient-country.code" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
+  <field name="transaction.sector.code" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
   <field name="transaction.sector.vocabulary" type="text_general"/>
   <field name="transaction.humanitarian" type="booleans"/>
 
