@@ -646,6 +646,10 @@ def set_default_percentage(targets):
     if not targets:
         return []
 
+    # if there is already a percentage present in the targets, do not override it:
+    if any('percentage' in t for t in targets):
+        return targets
+
     vocab_counts = Counter(t['vocabulary'] for t in targets if 'vocabulary' in t)
     total_targets = len(targets)
     default_percentage = 100 / total_targets
