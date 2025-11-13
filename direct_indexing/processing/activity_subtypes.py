@@ -190,7 +190,7 @@ def _trim_transactions(transactions):
             sector = _trim_field(t.get('sector', None), ['code', 'percentage', 'vocabulary', 'narrative'])
             policy_marker = _trim_field(t.get('policy-marker', None), ['code'])
             policy_marker_combined = t.get('policy-marker.combined', None)
-            participating_org = _trim_field(t.get('participating-org', None), ['ref', 'narrative'])
+            participating_org = _trim_field(t.get('participating-org', None), ['ref', 'type', 'narrative'])
             title = _trim_field(t.get('title', None), ['narrative'])
             recipient_country_name = t.get('recipient-country.name', None)
             recipient_region_name = t.get('recipient-region.name', None)

@@ -536,6 +536,7 @@
   <field name="sector.vocabulary" type="text_general"/>
   <field name="policy-marker.code" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
   <field name="participating-org.ref" type="non_case_sensitive" multiValued="true"/>
+  <field name="participating-org.type" type="text_general"/>
   <field name="title.narrative" type="iati_narrative"/>
   <field name="recipient-country.name" type="text_general"/>
 
