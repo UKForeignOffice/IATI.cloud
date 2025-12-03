@@ -216,7 +216,7 @@ SOLR_DRAFT_ORGANISATION_URL = f'{SOLR_DRAFT_ORGANISATION}/update'
 # # IATI Data
 METADATA_PUBLISHER_URL = 'https://registry.codeforiati.org/publisher_list.json'
 METADATA_DATASET_URL = 'https://registry.codeforiati.org/dataset_list.json'
-DATASET_URL = 'https://data.iati-data-dump.opendataservices.coop/data.zip'
+DATASET_URL = 'https://bulk-data.iatistandard.org/code-for-iati-data-download.zip'
 
 # # PATHS
 SOLR_POST_TOOL = os.path.join(BASE_DIR, 'direct_indexing/solr/bin/post')
