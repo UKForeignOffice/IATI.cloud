@@ -295,7 +295,7 @@ def _create_fcdo_budget_item(iati_id, hierarchy, db, budget_type, budget_start, 
     sector_code = db.get('sector_code', '')
     dac5_s_c = sector_code
     # if this sector code is a dac3, add default 10, which is the first dac5 version of the dac3 sector
-    if sector_code < 1000:
+    if sector_code != '' and sector_code < 1000:
         dac5_s_c = sector_code*100+10
     dac5_name = DAC5.get(dac5_s_c, '')
     if dac5_s_c in DAC5:
