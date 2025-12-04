@@ -174,7 +174,7 @@ To update the index:
 2. Run `bash scripts/update_docs_index.sh` from the IATI.cloud root directory. Or do it manually with:
 
 ```bash
-cat README.MD ./docs/*.md > ./docs/combined.md
+cat README.md ./docs/*.md > ./docs/combined.md
 pandoc ./docs/combined.md -o ./docs/index.html
 rm ./docs/combined.md
 ```

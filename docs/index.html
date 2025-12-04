@@ -263,7 +263,7 @@ created with pandoc, by combining the README and the markdown files in
 IATI.cloud root directory. Or do it manually with:</li>
 </ol>
 <div class="sourceCode" id="cb2"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> README.MD ./docs/<span class="pp">*</span>.md <span class="op">&gt;</span> ./docs/combined.md</span>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>README.md ./docs/<span class="pp">*</span>.md <span class="op">&gt;</span> ./docs/combined.md</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> ./docs/combined.md <span class="at">-o</span> ./docs/index.html</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> ./docs/combined.md</span></code></pre></div>
 <p>Ensure this is pushed to the correct branch or change the branch on
