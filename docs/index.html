@@ -1,3 +1,11 @@
+<head><!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CP65J0T1G0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag("js", new Date());
+gtag("config", "G-CP65J0T1G0");
+</script></head>
 <h1 id="iati.cloud">IATI.cloud</h1>
 <p><a
 href="https://sonarcloud.io/dashboard?id=zimmerman-zimmerman_iati.cloud"><img
@@ -263,7 +271,7 @@ created with pandoc, by combining the README and the markdown files in
 IATI.cloud root directory. Or do it manually with:</li>
 </ol>
 <div class="sourceCode" id="cb2"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>README.md ./docs/<span class="pp">*</span>.md <span class="op">&gt;</span> ./docs/combined.md</span>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> README.md ./docs/<span class="pp">*</span>.md <span class="op">&gt;</span> ./docs/combined.md</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> ./docs/combined.md <span class="at">-o</span> ./docs/index.html</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> ./docs/combined.md</span></code></pre></div>
 <p>Ensure this is pushed to the correct branch or change the branch on
