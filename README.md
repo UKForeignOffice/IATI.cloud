@@ -1,8 +1,8 @@
 # IATI.cloud
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=zimmerman-zimmerman_iati.cloud&metric=alert_status)](https://sonarcloud.io/dashboard?id=zimmerman-zimmerman_iati.cloud)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Open issues](https://img.shields.io/github/issues/zimmerman-zimmerman/OIPA.svg?style=flat)](https://github.com/zimmerman-team/iati.cloud/issues)
+[![SonarCloud Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=zimmerman-zimmerman_iati.cloud&metric=alert_status "Quality Gate Status")](https://sonarcloud.io/dashboard?id=zimmerman-zimmerman_iati.cloud)
+[![MIT License Badge](https://img.shields.io/badge/License-MIT-yellow.svg "Licensed under MIT")](https://opensource.org/licenses/MIT)
+[![GitHub Open Issues Count](https://img.shields.io/github/issues/zimmerman-zimmerman/OIPA.svg?style=flat "Open Issues")](https://github.com/zimmerman-team/iati.cloud/issues)
 
 ---
 
@@ -30,11 +30,11 @@
 
 IATI.cloud extracts all published IATI XML files from the [IATI Registry](http://www.iatiregistry.org/publisher) and stores all data in Apache Solr cores, allowing for fast access.
 
-IATI is a global aid transparency standard and it makes information about aid spending easier to access, re-use and understand the underlying data using a unified open standard. You can find more about the IATI data standard at: [www.iatistandard.org](www.iatistandard.org)
+IATI is a global aid transparency standard and it makes information about aid spending easier to access, re-use and understand the underlying data using a unified open standard. You can find more about the IATI data standard at the [IATI Standard website](https://www.iatistandard.org)
 
 We have recently moved towards a Solr Only version of the IATI.cloud. If you are looking for the hybrid IATI.cloud with Django API and Solr API, you can find this under the branch `archive/iati-cloud-hybrid-django-solr`
 
-You can install this codebase using Docker. Follow the Docker Guide for more information.
+You can install this codebase using Docker. Follow the [Docker installation guide](./docs/DOCKER.md) for more information.
 
 ## Setting up, running and using IATI cloud
 
@@ -175,7 +175,7 @@ To update the index:
 
 ```bash
 cat README.md ./docs/*.md > ./docs/combined.md
-pandoc ./docs/combined.md -o ./docs/index.html
+pandoc -s --metadata title="IATI.cloud Documentation" -o ./docs/index.html ./docs/combined.md
 rm ./docs/combined.md
 ```
 

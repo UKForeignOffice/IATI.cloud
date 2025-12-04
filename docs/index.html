@@ -1,22 +1,256 @@
-<head><!-- Google tag (gtag.js) -->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-CP65J0T1G0"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag("js", new Date());
 gtag("config", "G-CP65J0T1G0");
-</script></head>
+</script>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>IATI.cloud Documentation</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">IATI.cloud Documentation</h1>
+</header>
 <h1 id="iati.cloud">IATI.cloud</h1>
 <p><a
 href="https://sonarcloud.io/dashboard?id=zimmerman-zimmerman_iati.cloud"><img
 src="https://sonarcloud.io/api/project_badges/measure?project=zimmerman-zimmerman_iati.cloud&amp;metric=alert_status"
-alt="Quality Gate Status" /></a> <a
-href="https://opensource.org/licenses/MIT"><img
+title="Quality Gate Status" alt="SonarCloud Quality Gate Status" /></a>
+<a href="https://opensource.org/licenses/MIT"><img
 src="https://img.shields.io/badge/License-MIT-yellow.svg"
-alt="License: MIT" /></a> <a
+title="Licensed under MIT" alt="MIT License Badge" /></a> <a
 href="https://github.com/zimmerman-team/iati.cloud/issues"><img
 src="https://img.shields.io/github/issues/zimmerman-zimmerman/OIPA.svg?style=flat"
-alt="Open issues" /></a></p>
+title="Open Issues" alt="GitHub Open Issues Count" /></a></p>
 <hr />
 <ul>
 <li><a href="#iaticloud">IATI.cloud</a>
@@ -55,14 +289,15 @@ stores all data in Apache Solr cores, allowing for fast access.</p>
 <p>IATI is a global aid transparency standard and it makes information
 about aid spending easier to access, re-use and understand the
 underlying data using a unified open standard. You can find more about
-the IATI data standard at: <a
-href="www.iatistandard.org">www.iatistandard.org</a></p>
+the IATI data standard at the <a
+href="https://www.iatistandard.org">IATI Standard website</a></p>
 <p>We have recently moved towards a Solr Only version of the IATI.cloud.
 If you are looking for the hybrid IATI.cloud with Django API and Solr
 API, you can find this under the branch
 <code>archive/iati-cloud-hybrid-django-solr</code></p>
-<p>You can install this codebase using Docker. Follow the Docker Guide
-for more information.</p>
+<p>You can install this codebase using Docker. Follow the <a
+href="./docs/DOCKER.md">Docker installation guide</a> for more
+information.</p>
 <h2 id="setting-up-running-and-using-iati-cloud">Setting up, running and
 using IATI cloud</h2>
 <p>Running and setting up is split into two parts: docker and manual.
@@ -272,7 +507,7 @@ IATI.cloud root directory. Or do it manually with:</li>
 </ol>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> README.md ./docs/<span class="pp">*</span>.md <span class="op">&gt;</span> ./docs/combined.md</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> ./docs/combined.md <span class="at">-o</span> ./docs/index.html</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> <span class="at">-s</span> <span class="at">--metadata</span> title=<span class="st">&quot;IATI.cloud Documentation&quot;</span> <span class="at">-o</span> ./docs/index.html ./docs/combined.md</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> ./docs/combined.md</span></code></pre></div>
 <p>Ensure this is pushed to the correct branch or change the branch on
 <a
@@ -336,9 +571,9 @@ specifications running. This includes Django, RabbitMQ and Celery, along
 with a postgres database, mongodb for aggregation, Apache Solr for
 document indexing, and lastly NGINX as a web server.</p>
 <p>To accomplish this, we have created a <a
-href="../docker-compose.yml">docker-compose</a> file, which starts all
-of the services. Each “cog in the system” is it’s own runnable docker
-container.</p>
+href="../docker-compose.yml">docker-compose.yml configuration file</a>,
+which starts all of the services. Each “cog in the system” is it’s own
+runnable docker container.</p>
 <p>The services use the default docker compose network. Each service
 registers itself to the network through the service name. This allows
 the docker containers to connect to eachother. Where locally you would
@@ -348,9 +583,10 @@ providing a port like <code>ports: 8000:8000</code>, you allow the
 localhost port 8000 to connect through to the docker container’s port
 8000.</p>
 <h2 id="env">.env</h2>
-<p>Please check out the <a href="./LOCAL.md#env">reference of .env under
-the local docs</a>. They are the same with the exception of the host IPs
-which are the services as explained above.</p>
+<p>Please check out the <a href="./LOCAL.md#env">environment variable
+reference in the local installation documentation</a>. They are the same
+with the exception of the host IPs which are the services as explained
+above.</p>
 <h2 id="services">Services</h2>
 <table>
 <colgroup>
@@ -509,7 +745,7 @@ proper building for usage in all celery services.</li>
 <p>If you are looking for manual steps to installation, follow the chain
 of function in the scripts starting at <a
 href="../scripts/setup.sh">setup.sh</a>, or read up on the scripts that
-are available in <a href="./SCRIPTS.md">the SCRIPTS
+are available in <a href="./SCRIPTS.md">the available scripts
 documentation</a>.</p>
 <h2 id="docker-usage">Docker usage</h2>
 <h3 id="running-basics">Running basics</h3>
@@ -606,7 +842,7 @@ not all systems.</p>
 <p>The second part is a <a href="#setup">setup</a> guide, which explains
 which steps to take to get your IATI.cloud instance up and running.</p>
 <p>Alternatively, you can use docker locally as well. <a
-href="./DOCKER.md">Read more about our docker setup</a>.</p>
+href="./DOCKER.md">Read the Docker installation and setup guide</a>.</p>
 <h2 id="installation-of-dependencies">Installation of dependencies</h2>
 <h3 id="install-python">Install python</h3>
 <div class="sourceCode" id="cb13"><pre
@@ -631,8 +867,8 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href=
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install rabbitmq-server</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable rabbitmq-server.service</span></code></pre></div>
 <p><a
-href="https://computingforgeeks.com/how-to-install-latest-rabbitmq-server-on-ubuntu-linux/">if
-there are issues with installing rabbitmq</a></p>
+href="https://computingforgeeks.com/how-to-install-latest-rabbitmq-server-on-ubuntu-linux/">Alternative
+RabbitMQ installation guide for Ubuntu Linux</a></p>
 <h3 id="install-solr">Install Solr</h3>
 <div class="sourceCode" id="cb17"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install java</span></span>
@@ -1035,7 +1271,8 @@ transactions)</a></p>
 <p>We then recursively clean the dataset. <code>@</code> values are
 removed, <code>@{http://www.w3.org/XML/1998/namespace}lang</code> is
 replaced with <code>lang</code>, and key-value fields are extracted. <a
-href="../direct_indexing/cleaning/dataset.py">Read more here</a>.</p>
+href="../direct_indexing/cleaning/dataset.py">View the dataset cleaning
+implementation</a>.</p>
 <h4 id="adding-custom-fields">Adding custom fields</h4>
 <p>We have several “custom fields” that we enrich the IATI data
 with.</p>
@@ -1091,12 +1328,12 @@ href="../direct_indexing/custom_fields/raise_h2_budget_data_to_h1.py">Related
 activity data to parent activity</a>: This ‘raises’ related activity
 budget data from the H2 activities to the H1 activities.</li>
 </ul>
-<p><a href="../direct_indexing/custom_fields/custom_fields.py">Check it
-out in depth here</a></p>
+<p><a href="../direct_indexing/custom_fields/custom_fields.py">View
+detailed custom fields implementation</a></p>
 <h4 id="extracting-subtypes">Extracting subtypes</h4>
 <p>We extract the subtypes to single valued fields. <a
-href="../direct_indexing/processing/activity_subtypes.py">Read more
-here</a>.</p>
+href="../direct_indexing/processing/activity_subtypes.py">View the
+activity subtypes extraction implementation</a>.</p>
 <p>Each of these is indexed separately into its respective core.</p>
 <h4 id="final-step">Final step</h4>
 <p>Lastly, if the previous steps were all successful, we index the IATI
@@ -1515,13 +1752,13 @@ and dataset dump, and processes it.</td>
 checkbox.<br />Alternatively, this can be set up on a crontab schedule
 every three (3) hours, as the dataset dump updates every three hours
 (note:remove the <code>one-off task</code>
-tick)</br><strong>arguments</strong>:</br>- update: a boolean flag which
-indicates if the IATI.cloud should be updated. If <code>True</code>, the
-existing activities are updated, if <code>False</code>, drops all the
-data from the solr cores and does a complete re-index.<br />- drop: a
-boolean flag which indicates whether or not older datasets (no longer
-available in this indexing cycle) should be removed from
-IATI.cloud.</td>
+tick)<br /><strong>arguments</strong>:<br />- update: a boolean flag
+which indicates if the IATI.cloud should be updated. If
+<code>True</code>, the existing activities are updated, if
+<code>False</code>, drops all the data from the solr cores and does a
+complete re-index.<br />- drop: a boolean flag which indicates whether
+or not older datasets (no longer available in this indexing cycle)
+should be removed from IATI.cloud.</td>
 </tr>
 <tr class="odd">
 <td>direct_indexing.tasks.subtask_dataset_metadata</td>
@@ -1545,18 +1782,19 @@ runnable task</td>
 URL, dataset title, dataset name (no spaces, for example fcdo_set-13 or
 finland_mfa-001), and organisation name.</td>
 <td>Manual setup, every second and tick the <code>one-off task</code>
-checkbox.<br /></br><strong>arguments</strong>:</br>- url: the string of
-the XML Dataset URL.</br>- title: A fancy title for the dataset.</br>-
-name: A no-space dataset name.</br>- org: The organisation name.</td>
+checkbox.<br /><br /><strong>arguments</strong>:<br />- url: the string
+of the XML Dataset URL.<br />- title: A fancy title for the
+dataset.<br />- name: A no-space dataset name.<br />- org: The
+organisation name.</td>
 </tr>
 <tr class="even">
 <td>direct_indexing.tasks.remove_custom_dataset</td>
 <td>Manually remove a custom dataset</td>
 <td>Removes the provided custom indexed dataset.</td>
 <td>Manual setup, every second and tick the <code>one-off task</code>
-checkbox.<br /></br><strong>arguments</strong>:</br>- dataset_id: The id
-of the dataset to be removed, can be found in the <em>dataset</em>
-core.</br>- name: A no-space dataset name.</br>- org: The organisation
+checkbox.<br /><br /><strong>arguments</strong>:<br />- dataset_id: The
+id of the dataset to be removed, can be found in the <em>dataset</em>
+core.<br />- name: A no-space dataset name.<br />- org: The organisation
 name.</td>
 </tr>
 </tbody>
@@ -1833,16 +2071,24 @@ displayed first.</li>
 <h2 id="appendices">Appendices</h2>
 <h3 id="django-admin-interface">1. Django admin interface</h3>
 <figure>
-<img src="./images/admin_interface.png" alt="image" />
-<figcaption aria-hidden="true">image</figcaption>
+<img src="./images/admin_interface.png"
+alt="Django admin interface showing navigation menu with Groups, Users, Celery Results, Exchange rates, Crontabs, Intervals, Periodic tasks, and Clocked options" />
+<figcaption aria-hidden="true">Django admin interface showing navigation
+menu with Groups, Users, Celery Results, Exchange rates, Crontabs,
+Intervals, Periodic tasks, and Clocked options</figcaption>
 </figure>
 <h3 id="django-celery-task-results">2. django Celery Task results</h3>
 <figure>
-<img src="./images/task_results.png" alt="image" />
-<figcaption aria-hidden="true">image</figcaption>
+<img src="./images/task_results.png"
+alt="Django Celery task results page displaying a table of task executions with columns for task name, arguments, status, date created, and date done" />
+<figcaption aria-hidden="true">Django Celery task results page
+displaying a table of task executions with columns for task name,
+arguments, status, date created, and date done</figcaption>
 </figure>
 <h3 id="celery-flower">3. Celery Flower</h3>
 <p>Main interface: <img src="./images/celeryflower.png"
-alt="image" /></p>
+alt="Celery Flower main interface showing task monitoring dashboard with active workers, task statistics, and real-time task execution graphs" /></p>
 <p>Specific task result: <img src="./images/celeryflower_result.png"
-alt="image" /></p>
+alt="Celery Flower task result detail page showing individual task execution information including task ID, state, arguments, result, and traceback" /></p>
+</body>
+</html>

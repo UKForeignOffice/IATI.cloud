@@ -41,13 +41,13 @@ Notes:
 We want to have a full stack IATI.cloud application with the above specifications running.
 This includes Django, RabbitMQ and Celery, along with a postgres database, mongodb for aggregation, Apache Solr for document indexing, and lastly NGINX as a web server.
 
-To accomplish this, we have created a [docker-compose](../docker-compose.yml) file, which starts all of the services. Each "cog in the system" is it's own runnable docker container.
+To accomplish this, we have created a [docker-compose.yml configuration file](../docker-compose.yml), which starts all of the services. Each "cog in the system" is it's own runnable docker container.
 
 The services use the default docker compose network. Each service registers itself to the network through the service name. This allows the docker containers to connect to eachother. Where locally you would use `localhost:5432`, a docker container connecting to a PostgreSQL container would refer to `database:5432`. By providing a port like `ports: 8000:8000`, you allow the localhost port 8000 to connect through to the docker container's port 8000.
 
 ## .env
 
-Please check out the [reference of .env under the local docs](./LOCAL.md#env). They are the same with the exception of the host IPs which are the services as explained above.
+Please check out the [environment variable reference in the local installation documentation](./LOCAL.md#env). They are the same with the exception of the host IPs which are the services as explained above.
 
 ## Services
 
@@ -80,7 +80,7 @@ The following is a description of all the steps required to set up IATI.cloud th
 - Install Solr and set up the cores
 - Initial build of `iaticloud` docker image, to ensure proper building for usage in all celery services.
 
-If you are looking for manual steps to installation, follow the chain of function in the scripts starting at [setup.sh](../scripts/setup.sh), or read up on the scripts that are available in [the SCRIPTS documentation](./SCRIPTS.md).
+If you are looking for manual steps to installation, follow the chain of function in the scripts starting at [setup.sh](../scripts/setup.sh), or read up on the scripts that are available in [the available scripts documentation](./SCRIPTS.md).
 
 ## Docker usage
 

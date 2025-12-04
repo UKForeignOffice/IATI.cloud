@@ -75,11 +75,11 @@ If the final task is enabled, every 3 hours, IATI.cloud will update to contain t
 |direct_indexing.tasks.clear_all_cores|Clear all cores|Removes all of the data from all of the [endpoints](#querying-data)|Manual setup, every second and tick the `one-off task` checkbox.
 |direct_indexing.tasks.fcdo_replace_partial_url|FCDO Replace partial url matches|Used to update a dataset based on the provided URL. For example, if an existing dataset has the url 'example.com/a.xml', and a staging dataset is prepared at 'staging-example.com/a.xml', the file is downloaded and the iati datastore is refreshed with the new content for this file.<br /><br />Note: if the setting "FRESH" is active, and the datastore is incrementally updating, the custom dataset will be overwritten by the incremental update. If this feature is used, either disable the incremental updates (admin panel), or set the Fresh setting to false (source code).|Manual setup, every second and tick the `one-off task` checkbox.<br />**arguments**:<br />- find_url: the url to be replaced<br />- replace_url: the new url
 |direct_indexing.tasks.revoke_all_tasks|Revoke all tasks|Cancels every task that is currently queued (does not cancel tasks currently being executed by Celery Workers).|Manual setup, every second and tick the `one-off task` checkbox.
-|direct_indexing.tasks.start|Start IATI.cloud indexing|Triggers an update for the IATI.cloud, downloads the latest metadata and dataset dump, and processes it.|Manual setup, every second and tick the `one-off task` checkbox.<br />Alternatively, this can be set up on a crontab schedule every three (3) hours, as the dataset dump updates every three hours (note:remove the `one-off task` tick)</br>**arguments**:</br>- update: a boolean flag which indicates if the IATI.cloud should be updated. If `True`, the existing activities are updated, if `False`, drops all the data from the solr cores and does a complete re-index.<br />- drop: a boolean flag which indicates whether or not older datasets (no longer available in this indexing cycle) should be removed from IATI.cloud.
+|direct_indexing.tasks.start|Start IATI.cloud indexing|Triggers an update for the IATI.cloud, downloads the latest metadata and dataset dump, and processes it.|Manual setup, every second and tick the `one-off task` checkbox.<br />Alternatively, this can be set up on a crontab schedule every three (3) hours, as the dataset dump updates every three hours (note:remove the `one-off task` tick)<br />**arguments**:<br />- update: a boolean flag which indicates if the IATI.cloud should be updated. If `True`, the existing activities are updated, if `False`, drops all the data from the solr cores and does a complete re-index.<br />- drop: a boolean flag which indicates whether or not older datasets (no longer available in this indexing cycle) should be removed from IATI.cloud.
 |direct_indexing.tasks.subtask_dataset_metadata|Dataset metadata subtask|Processes and indexes dataset metadata. This process also tringgers a dataset indexing task for every dataset metadata dict|This is a subtask which is used by the system, not necessary as a runnable task|
 |direct_indexing.tasks.subtask_publisher_metadata|Publisher metadata subtask|Processes and indexes publisher metadata|This is a subtask which is used by the system, not necessary as a runnable task|
-|direct_indexing.tasks.index_custom_dataset|Manually index a dataset with an URL|Manually indexes the provided dataset. The user needs to provide a URL, dataset title, dataset name (no spaces, for example fcdo_set-13 or finland_mfa-001), and organisation name.|Manual setup, every second and tick the `one-off task` checkbox.<br /></br>**arguments**:</br>- url: the string of the XML Dataset URL.</br>- title: A fancy title for the dataset.</br>- name: A no-space dataset name.</br>- org: The organisation name.
-|direct_indexing.tasks.remove_custom_dataset|Manually remove a custom dataset|Removes the provided custom indexed dataset.|Manual setup, every second and tick the `one-off task` checkbox.<br /></br>**arguments**:</br>- dataset_id: The id of the dataset to be removed, can be found in the _dataset_ core.</br>- name: A no-space dataset name.</br>- org: The organisation name.|
+|direct_indexing.tasks.index_custom_dataset|Manually index a dataset with an URL|Manually indexes the provided dataset. The user needs to provide a URL, dataset title, dataset name (no spaces, for example fcdo_set-13 or finland_mfa-001), and organisation name.|Manual setup, every second and tick the `one-off task` checkbox.<br /><br />**arguments**:<br />- url: the string of the XML Dataset URL.<br />- title: A fancy title for the dataset.<br />- name: A no-space dataset name.<br />- org: The organisation name.
+|direct_indexing.tasks.remove_custom_dataset|Manually remove a custom dataset|Removes the provided custom indexed dataset.|Manual setup, every second and tick the `one-off task` checkbox.<br /><br />**arguments**:<br />- dataset_id: The id of the dataset to be removed, can be found in the _dataset_ core.<br />- name: A no-space dataset name.<br />- org: The organisation name.|
 
 ## Querying data
 
@@ -134,16 +134,16 @@ Here are some tips on how to write effective queries for Solr:
 
 ### 1. Django admin interface
 
-![image](./images/admin_interface.png)
+![Django admin interface showing navigation menu with Groups, Users, Celery Results, Exchange rates, Crontabs, Intervals, Periodic tasks, and Clocked options](./images/admin_interface.png )
 
 ### 2. django Celery Task results
 
-![image](./images/task_results.png)
+![Django Celery task results page displaying a table of task executions with columns for task name, arguments, status, date created, and date done](./images/task_results.png)
 
 ### 3. Celery Flower
 
 Main interface:
-![image](./images/celeryflower.png)
+![Celery Flower main interface showing task monitoring dashboard with active workers, task statistics, and real-time task execution graphs](./images/celeryflower.png)
 
 Specific task result:
-![image](./images/celeryflower_result.png)
+![Celery Flower task result detail page showing individual task execution information including task ID, state, arguments, result, and traceback](./images/celeryflower_result.png)
