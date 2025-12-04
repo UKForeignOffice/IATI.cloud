@@ -1,0 +1,1840 @@
+<h1 id="iati.cloud">IATI.cloud</h1>
+<p><a
+href="https://sonarcloud.io/dashboard?id=zimmerman-zimmerman_iati.cloud"><img
+src="https://sonarcloud.io/api/project_badges/measure?project=zimmerman-zimmerman_iati.cloud&amp;metric=alert_status"
+alt="Quality Gate Status" /></a> <a
+href="https://opensource.org/licenses/MIT"><img
+src="https://img.shields.io/badge/License-MIT-yellow.svg"
+alt="License: MIT" /></a> <a
+href="https://github.com/zimmerman-team/iati.cloud/issues"><img
+src="https://img.shields.io/github/issues/zimmerman-zimmerman/OIPA.svg?style=flat"
+alt="Open issues" /></a></p>
+<hr />
+<ul>
+<li><a href="#iaticloud">IATI.cloud</a>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#setting-up-running-and-using-iati-cloud">Setting up,
+running and using IATI cloud</a></li>
+<li><a href="#requirements">Requirements</a>
+<ul>
+<li><a href="#software">Software</a></li>
+<li><a href="#hardware">Hardware</a>
+<ul>
+<li><a href="#local-development">Local development</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#submodules">Submodules</a></li>
+<li><a href="#central-python-packages">Central python packages</a></li>
+<li><a href="#code-management">Code Management</a></li>
+<li><a href="#testing">Testing</a></li>
+<li><a href="#contributing">Contributing</a>
+<ul>
+<li><a href="#can-i-contribute">Can I contribute?</a></li>
+<li><a href="#how-should-i-contribute">How should I contribute?</a></li>
+</ul></li>
+<li><a href="#who-makes-or-made-use-of-iaticloud">Who makes or made use
+of IATI.cloud?</a></li>
+<li><a href="#branches">Branches</a></li>
+<li><a href="#index">Index</a></li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="introduction">Introduction</h2>
+<p>IATI.cloud extracts all published IATI XML files from the <a
+href="http://www.iatiregistry.org/publisher">IATI Registry</a> and
+stores all data in Apache Solr cores, allowing for fast access.</p>
+<p>IATI is a global aid transparency standard and it makes information
+about aid spending easier to access, re-use and understand the
+underlying data using a unified open standard. You can find more about
+the IATI data standard at: <a
+href="www.iatistandard.org">www.iatistandard.org</a></p>
+<p>We have recently moved towards a Solr Only version of the IATI.cloud.
+If you are looking for the hybrid IATI.cloud with Django API and Solr
+API, you can find this under the branch
+<code>archive/iati-cloud-hybrid-django-solr</code></p>
+<p>You can install this codebase using Docker. Follow the Docker Guide
+for more information.</p>
+<h2 id="setting-up-running-and-using-iati-cloud">Setting up, running and
+using IATI cloud</h2>
+<p>Running and setting up is split into two parts: docker and manual.
+Because of the extensiveness of these sections they are contained in
+their own files. We’ve also included a usage guide, as well as a guide
+to how the IATI.cloud processes data. Find them here:</p>
+<ul>
+<li><a href="./docs/DOCKER.md">Docker guide</a></li>
+<li><a href="./docs/LOCAL.md">Local guide</a></li>
+<li><a href="./docs/USAGE.md">Usage guide</a></li>
+<li><a href="./docs/PROCESSING.md">Data processing guide</a></li>
+<li><a href="./docs/SCRIPTS.md">Scripts</a></li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="software">Software</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Software</th>
+<th>Version (tested and working)</th>
+<th>What is it for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Python</td>
+<td>3.11</td>
+<td>General runtime</td>
+</tr>
+<tr class="even">
+<td>PostgreSQL</td>
+<td>LTS</td>
+<td>Django and celery support</td>
+</tr>
+<tr class="odd">
+<td>RabbitMQ</td>
+<td>LTS</td>
+<td>Messaging system for Celery</td>
+</tr>
+<tr class="even">
+<td>MongoDB</td>
+<td>LTS</td>
+<td>Aggregation support for Direct Indexing</td>
+</tr>
+<tr class="odd">
+<td>Solr</td>
+<td>9.8.1</td>
+<td>Used for indexing IATI Data</td>
+</tr>
+<tr class="even">
+<td>(optional) Docker</td>
+<td>LTS</td>
+<td>Running full stack IATI.cloud</td>
+</tr>
+<tr class="odd">
+<td>(optional) NGINX</td>
+<td>LTS</td>
+<td>Connection</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hardware">Hardware</h3>
+<p><em>Disk space</em>: Generally, around 600GB of disk space should be
+available for indexing the entire IATI dataset, especially if the json
+dump fields are active (with .env FCDO_INSTANCE=True). If not, you can
+get away with around 300GB.</p>
+<p><em>RAM</em>: Around 20GB of RAM has historically proven to be an
+issue, which led to us setting a RAM requirement of 40GB. <a
+href="https://linuxize.com/post/create-a-linux-swap-file/">Here is a
+handy guide to setting up RAM Swap</a></p>
+<h4 id="local-development">Local development</h4>
+<p>For local development, only a limited amount of disk space is
+required. The complete iati dataset unindexed is around 10GB, and you
+can limit the dataset indexing quite extensively, you can easily trim
+the size requirement down to less than 20GB, especially by limiting the
+datasets.</p>
+<p>For local development, Docker and NGINX are not required, but docker
+is recommended to avoid system sided setup issues.</p>
+<h2 id="submodules">Submodules</h2>
+<p>We make use of a single submodule, which contains a dump of the
+Django static files for the administration panel, as well as the
+IATI.cloud frontend and streamsaver (used to stream large files to a
+user). To update the IATI.cloud frontend, create a fresh build from the
+<a href="https://github.com/zimmerman-team/iati.cloud.frontend">frontend
+repository</a>, and replace the files in the submodule. Specifically, we
+include the <code>./build</code> folder, and copy the
+<code>./build/static/css</code>, <code>./build/static/js</code> and
+<code>./build/static/media</code> directories to the <code>static</code>
+submodule.</p>
+<p>To update the Django administrator static files, <a
+href="https://docs.djangoproject.com/en/4.1/ref/contrib/staticfiles/">collect
+the django static</a>, and update the files.</p>
+<p>Lastly, <a
+href="https://github.com/jimmywarting/StreamSaver.js">StreamSaver</a> is
+used to stream large files to the user.</p>
+<h2 id="central-python-packages">Central python packages</h2>
+<p><em>Django</em> is used to host a management interface for the Celery
+tasks, this was formerly used to host an API.</p>
+<p><em>celery</em>, combined with <em>flower</em>,
+<em>django-celery-beat</em>, and <em>django-celery-results</em> is used
+to manage multitask processing.</p>
+<p><em>psycopg2-binary</em> is used to connect to PostgreSQL.</p>
+<p><em>python-dotenv</em> is used for .env support.</p>
+<p><em>lxml</em> and <em>MechanicalSoup</em> are used for legacy working
+with XML Documents.</p>
+<p><em>pysolr</em>, <em>xmljson</em> and <em>pymongo</em> are used to
+support the direct indexing to Solr process.</p>
+<h2 id="code-management">Code Management</h2>
+<p><em>flake8</em> is used to maintain code quality in pep8 style</p>
+<p><em>isort</em> is used to maintain the imports</p>
+<p><em>pre-commit</em> is used to enforce commit styles in the form</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">feat:</span> A new feature</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">fix:</span> A bug fix</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">docs:</span> Documentation only changes</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">style:</span> Changes that do not affect the meaning of the code <span class="er">(</span><span class="ex">white-space,</span> formatting, missing semi-colons, etc<span class="kw">)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">refactor:</span> A code change that neither fixes a bug nor adds a feature</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">perf:</span> A code change that improves performance</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">test:</span> Adding missing or correcting existing tests</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">chore:</span> Changes to the build process or auxiliary tools and libraries such as documentation generation</span></code></pre></div>
+<h2 id="testing">Testing</h2>
+<p>We test with <code>pytest</code>,and use <code>coverage</code> to
+generage coverage reports. You can use <code>. scripts/cov.sh</code> to
+quickly run all tests and generate a coverage report. This also
+conveniently prints the location of the coverage HTML report, which can
+be viewed from your browser.</p>
+<h2 id="contributing">Contributing</h2>
+<h3 id="can-i-contribute">Can I contribute?</h3>
+<p>Yes! We are mainly looking for coders to help on the project. If you
+are a coder feel free to <em>Fork</em> the repository and send us your
+amazing Pull Requests!</p>
+<h3 id="how-should-i-contribute">How should I contribute?</h3>
+<p>Python already has clear PEP 8 code style guidelines, so it’s
+difficult to add something to it, but there are certain key points to
+follow when contributing:</p>
+<ul>
+<li>PEP 8 code style guidelines should always be followed. Tested with
+<code>flake8 OIPA</code>.</li>
+<li><a
+href="https://github.com/conventional-changelog/commitlint#what-is-commitlint">Commitlint</a>
+is used to check your commit messages.</li>
+<li>Always try to reference issues in commit messages or pull requests
+(“related to #614”, “closes #619” and etc.).</li>
+<li>Avoid huge code commits where the difference can not even be
+rendered by browser based web apps (Github for example). Smaller commits
+make it much easier to understand why and how the changes were made, why
+(if) it results in certain bugs and etc.</li>
+<li>When developing a new feature, write at least some basic tests for
+it. This helps not to break other things in the future. Tests can be run
+with <code>pytest</code></li>
+<li>If there’s a reason to commit code that is commented out (there
+usually should be none), always leave a “FIXME” or “TODO” comment so
+it’s clear for other developers why this was done.</li>
+<li>When using external dependencies that are not in PyPI (from Github
+for example), stick to a particular commit (i. e.
+<code>git+https://github.com/Supervisor/supervisor@ec495be4e28c694af1e41514e08c03cf6f1496c8#egg=supervisor</code>),
+so if the library is updated, it doesn’t break everything</li>
+<li>Automatic code quality / testing checks (continuous integration
+tools) are implemented to check all these things automatically when
+pushing / merging new branches. Quality is the key!</li>
+</ul>
+<h2 id="who-makes-or-made-use-of-iati.cloud">Who makes or made use of
+IATI.cloud?</h2>
+<ul>
+<li>Dutch Ministry of Foreign Affairs: <a
+href="https://www.openaid.nl">www.openaid.nl</a></li>
+<li>Finnish Ministry of Foreign Affairs: <a
+href="https://www.openaid.fi">www.openaid.fi</a></li>
+<li>FCDO Devtracker: <a
+href="https://devtracker.dfid.gov.uk/">devtracker.dfid.gov.uk</a></li>
+<li>UNESCO Transparency Portal: <a
+href="https://opendata.unesco.org">opendata.unesco.org</a></li>
+<li>Netherlands Enterprise Agency: <a
+href="https://aiddata.rvo.nl/">aiddata.rvo.nl</a></li>
+<li>Mohinga AIMS: <a
+href="http://mohinga.info/en/">mohinga.info</a></li>
+<li>UN-Habitat: <a
+href="http://open.unhabitat.org">open.unhabitat.org</a></li>
+<li>Overseas Development Institute: <a
+href="https://transparency.odi.org/">ODI.org</a></li>
+<li>UN Migration: <a href="https://www.iom.int/">IOM.int</a></li>
+<li>AIDA <a href="https://www.aida.tools/">AIDA.tools</a></li>
+</ul>
+<p>&amp; many others</p>
+<hr />
+<h2 id="branches">Branches</h2>
+<ul>
+<li><code>main</code> - production ready codebase</li>
+<li><code>develop</code> - completed but not yet released changes</li>
+<li><code>archive/iati-cloud-hybrid-django-solr</code> - django based
+“OIPA” version of IATI.cloud. Decommissioned around halfway through
+2022.</li>
+</ul>
+<p>Other branches should be prefixed similarly to commits, like
+<code>docs/added-usage-readme</code></p>
+<h2 id="index">Index</h2>
+<p>We provide <a href="./docs/index.html">an index file</a>, which
+serves as a front facing page for iati.cloud. Currently, the index is
+created with pandoc, by combining the README and the markdown files in
+<code>./docs</code>.</p>
+<p>To update the index:</p>
+<ol type="1">
+<li>make sure pandoc is installed:
+<code>sudo apt-get update &amp;&amp; sudo apt-get install -y pandoc</code></li>
+<li>Run <code>bash scripts/update_docs_index.sh</code> from the
+IATI.cloud root directory. Or do it manually with:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> README.MD ./docs/<span class="pp">*</span>.md <span class="op">&gt;</span> ./docs/combined.md</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> ./docs/combined.md <span class="at">-o</span> ./docs/index.html</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> ./docs/combined.md</span></code></pre></div>
+<p>Ensure this is pushed to the correct branch or change the branch on
+<a
+href="https://github.com/zimmerman-team/IATI.cloud/settings/pages">github
+-&gt; settings -&gt; pages</a>. # Installing and running IATI.cloud with
+Docker</p>
+<ul>
+<li><a href="#installing-and-running-iaticloud-with-docker">Installing
+and running IATI.cloud with Docker</a>
+<ul>
+<li><a href="#quick-start">Quick start</a></li>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#env">.env</a></li>
+<li><a href="#services">Services</a></li>
+<li><a href="#setup">Setup</a></li>
+<li><a href="#docker-usage">Docker usage</a>
+<ul>
+<li><a href="#running-basics">Running basics</a></li>
+<li><a href="#after-docker-service-changes">After docker service
+changes</a></li>
+<li><a href="#after-changing-solr-configuration">After changing solr
+configuration</a></li>
+<li><a href="#removing-built-docker-images">Removing built docker
+images</a></li>
+<li><a href="#connecting-to-live-docker-containers">Connecting to live
+docker containers</a></li>
+<li><a href="#connecting-to-docker-logs">Connecting to docker
+logs</a></li>
+<li><a href="#other-notes">Other notes</a></li>
+</ul></li>
+<li><a href="#usage">Usage</a></li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="quick-start">Quick start</h2>
+<p>Run the setup script from the IATI.cloud root directory</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> bash scripts/setup.sh</span></code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>Answer with <code>Y</code> to the confirmation requests. This will
+ensure your setup will be complete and consistently reproducible.</li>
+<li>We recommend providing Solr with 40GB max memory, as we have seen
+lower values leading to crashing due to maxing out the provided memory
+at 20GB. Use swap memory if necessary (setup provided).</li>
+<li>Install Cockpit if installing on a server or even on a local linux
+machine, it is a helpful tool for machine maintenance.</li>
+<li>If on a server, do set up NGINX and SSL for access. Ensure a domain
+is prepared, such as <code>test.iati.cloud</code> or
+<code>iaticloud.example.com</code>.</li>
+<li>We recommend using a mounted directory for Solr storage, as it makes
+manipulation of the created cores much easier.</li>
+<li>For the environment, do not use symbols in the password.</li>
+<li>When prompted for a domain, follow the example provided. If the
+example contains http or https, include it in the value. If it does not,
+do not include it in the value.</li>
+</ul>
+<h2 id="introduction-1">Introduction</h2>
+<p>We want to have a full stack IATI.cloud application with the above
+specifications running. This includes Django, RabbitMQ and Celery, along
+with a postgres database, mongodb for aggregation, Apache Solr for
+document indexing, and lastly NGINX as a web server.</p>
+<p>To accomplish this, we have created a <a
+href="../docker-compose.yml">docker-compose</a> file, which starts all
+of the services. Each “cog in the system” is it’s own runnable docker
+container.</p>
+<p>The services use the default docker compose network. Each service
+registers itself to the network through the service name. This allows
+the docker containers to connect to eachother. Where locally you would
+use <code>localhost:5432</code>, a docker container connecting to a
+PostgreSQL container would refer to <code>database:5432</code>. By
+providing a port like <code>ports: 8000:8000</code>, you allow the
+localhost port 8000 to connect through to the docker container’s port
+8000.</p>
+<h2 id="env">.env</h2>
+<p>Please check out the <a href="./LOCAL.md#env">reference of .env under
+the local docs</a>. They are the same with the exception of the host IPs
+which are the services as explained above.</p>
+<h2 id="services">Services</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>service</th>
+<th>network name</th>
+<th>ports</th>
+<th>image</th>
+<th>Additional notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>database</td>
+<td>database</td>
+<td>5432</td>
+<td>postgres:latest</td>
+<td>Using the POSTGRES_ fields in .env to set up and access.
+<code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code>,
+<code>POSTGRES_DB</code>, self-explanatory default values for the user,
+password and database name. We mount
+<code>/var/lib/postgresql/data</code> to our <code>db_data</code> docker
+‘volume’, which is persisted, meaning the container can be stopped and
+started without losing data.</td>
+</tr>
+<tr class="even">
+<td>rabbitmq</td>
+<td>rabbitmq</td>
+<td>5672,15672</td>
+<td>rabbitmq:latest</td>
+<td>We mount <code>/var/lib/rabbitmq</code> to our
+<code>rabbitmq_data</code> docker ‘volume’, which is persisted (as
+above).</td>
+</tr>
+<tr class="odd">
+<td>mongo</td>
+<td>mongo</td>
+<td>27017</td>
+<td>mongo:latest</td>
+<td>Accessed through <code>mongodb://USER:PASS@mongo:27017</code> where
+USER and PASS are set in the <code>MONGO_INITDB_</code> fields in .env.
+We mount <code>/data/db</code> to our <code>mongo_data</code> docker
+‘volume’, which is persisted (as above).</td>
+</tr>
+<tr class="even">
+<td>solr</td>
+<td>solr</td>
+<td>8983</td>
+<td>bitnami/solr:9.1.1</td>
+<td>Using bitnami instead of default solr because of the env options.
+We’re mounting the <code>/bitnami</code> directory to either the
+solr_data docker volume, or a local directory through the environment
+variable <code>SOLR_VOLUME</code>, which allows us to manipulate the
+core configuration. We pass SOLR_CORES with a list of all our cores. We
+pass <code>SOLR_OPTS</code> containing memory options. We’re using
+<code>SOLR_ADMIN_USERNAME</code> and <code>*_PASSWORD</code> to use
+authentication.</td>
+</tr>
+<tr class="odd">
+<td>iaticloud</td>
+<td>iaticloud</td>
+<td>8000</td>
+<td>. (local Dockerfile)</td>
+<td>We build a Docker image with our IATI.cloud codebase. This image
+installs the <a href="../requirements.txt">requirements</a>, Java 11
+(for the Solr post tool), and runs the <a
+href="../services/iaticloud/docker-entrypoint.sh">entrypoint</a>. The
+entrypoint waits for the depended services to be fully started, then
+checks if this is the initial run of the IATI.cloud container. If not,
+it sets up the static files, sets up the database and sets up the
+superuser with the <code>DJANGO_SUPERUSER_*</code> .env variables.</td>
+</tr>
+<tr class="even">
+<td>celeryworker</td>
+<td>none</td>
+<td>ports</td>
+<td>. (local Dockerfile)</td>
+<td>This runs on the <code>iaticloud</code> docker image. It runs main
+celery workers with N concurrency where N is the n.o. cores in the
+available CPU.</td>
+</tr>
+<tr class="odd">
+<td>celeryrevokeworker</td>
+<td>none</td>
+<td>ports</td>
+<td>. (local Dockerfile)</td>
+<td>This runs on the <code>iaticloud</code> docker image. It runs a
+single celery worker named Revoke to cancel all tasks</td>
+</tr>
+<tr class="even">
+<td>celeryscheduler</td>
+<td>none</td>
+<td>ports</td>
+<td>. (local Dockerfile)</td>
+<td>This runs on the <code>iaticloud</code> docker image. It runs celery
+beat</td>
+</tr>
+<tr class="odd">
+<td>celeryflower</td>
+<td>none</td>
+<td>5555</td>
+<td>. (local Dockerfile)</td>
+<td>This runs on the <code>iaticloud</code> docker image. It runs celery
+flower task management interface, uses the password and username from
+CELERYFLOWER_ prefixed .env fields</td>
+</tr>
+<tr class="even">
+<td>nginx</td>
+<td>nginx</td>
+<td>80</td>
+<td>./services/nginx</td>
+<td>Runs NGINX and enables the flower and datastore subdomains for a
+provided domain. For local development it also allows subdomains.
+Customize <code>SOLR_AUTH_ENCODED</code> and <code>IC_DOMAIN</code>.
+iati.cloud-redirect is available but not enabled by default. The docker
+image is more described <a
+href="../services/nginx/NGINX.md">here</a>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="setup">Setup</h2>
+<p>We recommend using the <code>./scripts/setup.sh</code> script to get
+everything set up for you, then running
+<code>sudo docker compose up -d</code> to start the required
+processes.</p>
+<p>The following is a description of all the steps required to set up
+IATI.cloud through docker:</p>
+<ul>
+<li>Set up the git submodule for Django static</li>
+<li>Set up the environment file</li>
+<li><ol start="15" type="a">
+<li>Set up swap memory in case there is not enough RAM available.</li>
+</ol></li>
+<li>Install docker</li>
+<li><ol start="15" type="a">
+<li>Install cockpit (linux dashboard, for server maintenance)</li>
+</ol></li>
+<li><ol start="15" type="a">
+<li>Install NGINX and Certbot</li>
+</ol></li>
+<li><ol start="15" type="a">
+<li>Set up Solr data on a mounted directory (optional but highly
+<strong>recommended</strong> for stable manipulation of cores)</li>
+</ol></li>
+<li>Install Solr and set up the cores</li>
+<li>Initial build of <code>iaticloud</code> docker image, to ensure
+proper building for usage in all celery services.</li>
+</ul>
+<p>If you are looking for manual steps to installation, follow the chain
+of function in the scripts starting at <a
+href="../scripts/setup.sh">setup.sh</a>, or read up on the scripts that
+are available in <a href="./SCRIPTS.md">the SCRIPTS
+documentation</a>.</p>
+<h2 id="docker-usage">Docker usage</h2>
+<h3 id="running-basics">Running basics</h3>
+<p>This assumes the setup has been done.</p>
+<p>Start the entire stack with:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker compose up <span class="at">-d</span></span></code></pre></div>
+<p>Stopping the docker containers:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker compose down</span></code></pre></div>
+<p>Restarting</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker compose down</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker compose up <span class="at">-d</span></span></code></pre></div>
+<h3 id="after-docker-service-changes">After docker service changes</h3>
+<p>For example, after updating the version of PostgresDB.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker compose build <span class="op">&lt;</span>SERVICE_NAME<span class="op">&gt;</span></span></code></pre></div>
+<h3 id="after-changing-solr-configuration">After changing solr
+configuration</h3>
+<p>For example, after changing the sector code from a
+<code>pdouble</code> to a <code>pint</code> in the <code>budget</code>
+core’s <code>managed-schema</code> file.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker compose up <span class="at">-d</span> solr</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> direct_indexing/solr/update_solr_cores.sh</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker compose down</span></code></pre></div>
+<p><em>note: this should only be done on empty cores. otherwise, your
+core might be unable to start the updated core. Use the clear_all_cores
+task in Django admin.</em></p>
+<h3 id="removing-built-docker-images">Removing built docker images</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker images</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker image rm <span class="op">&lt;</span>ID<span class="op">&gt;</span></span></code></pre></div>
+<h3 id="connecting-to-live-docker-containers">Connecting to live docker
+containers</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker exec <span class="at">-it</span> <span class="op">&lt;</span>SERVICE_NAME<span class="op">&gt;</span> /bin/bash</span></code></pre></div>
+<h3 id="connecting-to-docker-logs">Connecting to docker logs</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker logs <span class="op">&lt;</span>SERVICE_NAME<span class="op">&gt;</span></span></code></pre></div>
+<p>or, to get live updating logs</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> docker logs <span class="op">&lt;</span>SERVICE_NAME<span class="op">&gt;</span> -f</span></code></pre></div>
+<h3 id="other-notes">Other notes</h3>
+<ul>
+<li>use <code>--detach</code> or <code>-d</code> to detach the docker
+containers from the current terminal.</li>
+<li>use <code>--build</code> to rebuild the images.</li>
+<li>use <code>-f</code> to get live updates of logs.</li>
+</ul>
+<hr />
+<h2 id="usage">Usage</h2>
+<p><strong>Check out the <a href="./USAGE.md">Usage guide</a> for your
+next steps.</strong> # Installing IATI.cloud locally with all
+dependencies</p>
+<ul>
+<li><a
+href="#installing-iaticloud-locally-with-all-dependencies">Installing
+IATI.cloud locally with all dependencies</a>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#installation-of-dependencies">Installation of
+dependencies</a>
+<ul>
+<li><a href="#install-python">Install python</a></li>
+<li><a href="#install-postgresql">Install PostgreSQL</a></li>
+<li><a href="#install-mongodb">Install MongoDB</a></li>
+<li><a href="#install-rabbitmq">Install RabbitMQ</a></li>
+<li><a href="#install-solr">Install Solr</a></li>
+</ul></li>
+<li><a href="#setup">Setup</a>
+<ul>
+<li><a href="#dependencies">Dependencies</a></li>
+<li><a href="#env">.env</a></li>
+<li><a href="#python">Python</a></li>
+<li><a href="#postgresql">PostgreSQL</a></li>
+</ul></li>
+<li><a href="#running-iaticloud-manually">Running IATI.cloud
+manually</a></li>
+<li><a href="#usage">Usage</a></li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="introduction-2">Introduction</h2>
+<p>The following is split up into two sections. The first is an <a
+href="#installation-of-dependencies">installation</a> guide to the
+services that are required for IATI.cloud, like python and solr. However
+historically we have seen that across systems installations differ
+nearly every time, and therefore this guide is not considered complete.
+Use it as a guideline, rather than a step by step guide. Of course,
+google is your friend, and installation guides can be found for most if
+not all systems.</p>
+<p>The second part is a <a href="#setup">setup</a> guide, which explains
+which steps to take to get your IATI.cloud instance up and running.</p>
+<p>Alternatively, you can use docker locally as well. <a
+href="./DOCKER.md">Read more about our docker setup</a>.</p>
+<h2 id="installation-of-dependencies">Installation of dependencies</h2>
+<h3 id="install-python">Install python</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> add-apt-repository ppa:deadsnakes/ppa</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install python3.11</span></code></pre></div>
+<h3 id="install-postgresql">Install PostgreSQL</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install postgresql</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable postgresql.service</span></code></pre></div>
+<h3 id="install-mongodb">Install MongoDB</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install gnupg</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">-qO</span> <span class="at">-</span> https://www.mongodb.org/static/pgp/server-6.0.asc <span class="kw">|</span> <span class="fu">sudo</span> apt-key add <span class="at">-</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse&quot;</span> <span class="kw">|</span> <span class="fu">sudo</span> tee /etc/apt/sources.list.d/mongodb-org-6.0.list</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install <span class="at">-y</span> mongodb</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable mongod.service</span></code></pre></div>
+<h3 id="install-rabbitmq">Install RabbitMQ</h3>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">-y</span> erlang</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install rabbitmq-server</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable rabbitmq-server.service</span></code></pre></div>
+<p><a
+href="https://computingforgeeks.com/how-to-install-latest-rabbitmq-server-on-ubuntu-linux/">if
+there are issues with installing rabbitmq</a></p>
+<h3 id="install-solr">Install Solr</h3>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install java</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install openjdk-11-jdk openjdk-11-jre</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;&gt;</span> /etc/environment <span class="op">&lt;&lt;EOL</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="st">JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="st">JRE_HOME=/usr/lib/jvm/java-11-openjdk-amd64/jre</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="op">EOL</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Install solr</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /opt</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://archive.apache.org/dist/lucene/solr/9.8.1/solr-9.8.1.tgz</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> xzf solr-9.8.1.tgz solr-9.8.1/bin/install_solr_service.sh <span class="at">--strip-components</span><span class="op">=</span>2</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> bash ./install_solr_service.sh solr-9.8.1.tgz </span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Create required solr cores</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c activity -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c budget -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c dataset -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c organisation -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c publisher -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c result -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c transaction -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c draft_activity -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c draft_budget -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c draft_result -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> su <span class="at">-</span> solr <span class="at">-c</span> <span class="st">&quot;/opt/solr/bin/solr create -c draft_transaction -n data_driven_schema_configs&quot;</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/activity/managed-schema /var/solr/data/activity/conf/managed-schema.xml</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/budget/managed-schema /var/solr/data/budget/conf/managed-schema.xml</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/dataset/managed-schema /var/solr/data/dataset/conf/managed-schema.xml</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/organisation/managed-schema /var/solr/data/organisation/conf/managed-schema.xml</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/publisher/managed-schema /var/solr/data/publisher/conf/managed-schema.xml</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/result/managed-schema /var/solr/data/result/conf/managed-schema.xml</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/transaction/managed-schema /var/solr/data/transaction/conf/managed-schema.xml</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp <span class="at">-r</span> ./direct_indexing/solr/cores/activity/xslt /var/solr/data/activity/conf/</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/activity/managed-schema /var/solr/data/draft_activity/conf/managed-schema.xml</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/budget/managed-schema /var/solr/data/draft_budget/conf/managed-schema.xml</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/result/managed-schema /var/solr/data/draft_result/conf/managed-schema.xml</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cp ./direct_indexing/solr/cores/transaction/managed-schema /var/solr/data/draft_transaction/conf/managed-schema.xml</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/&lt;int name=&quot;maxFields&quot;&gt;1000&lt;\/int&gt;/&lt;int name=&quot;maxFields&quot;&gt;2000&lt;\/int&gt;/&#39;</span> /var/solr/data/activity/conf/solrconfig.xml</span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/&lt;int name=&quot;maxFields&quot;&gt;1000&lt;\/int&gt;/&lt;int name=&quot;maxFields&quot;&gt;2000&lt;\/int&gt;/&#39;</span> /var/solr/data/budget/conf/solrconfig.xml</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/&lt;int name=&quot;maxFields&quot;&gt;1000&lt;\/int&gt;/&lt;int name=&quot;maxFields&quot;&gt;2000&lt;\/int&gt;/&#39;</span> /var/solr/data/result/conf/solrconfig.xml</span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/&lt;int name=&quot;maxFields&quot;&gt;1000&lt;\/int&gt;/&lt;int name=&quot;maxFields&quot;&gt;2000&lt;\/int&gt;/&#39;</span> /var/solr/data/transaction/conf/solrconfig.xml</span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/&lt;int name=&quot;maxFields&quot;&gt;1000&lt;\/int&gt;/&lt;int name=&quot;maxFields&quot;&gt;2000&lt;\/int&gt;/&#39;</span> /var/solr/data/draft_activity/conf/solrconfig.xml</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/&lt;int name=&quot;maxFields&quot;&gt;1000&lt;\/int&gt;/&lt;int name=&quot;maxFields&quot;&gt;2000&lt;\/int&gt;/&#39;</span> /var/solr/data/draft_budget/conf/solrconfig.xml</span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/&lt;int name=&quot;maxFields&quot;&gt;1000&lt;\/int&gt;/&lt;int name=&quot;maxFields&quot;&gt;2000&lt;\/int&gt;/&#39;</span> /var/solr/data/draft_result/conf/solrconfig.xml</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sed <span class="at">-i</span> <span class="st">&#39;s/&lt;int name=&quot;maxFields&quot;&gt;1000&lt;\/int&gt;/&lt;int name=&quot;maxFields&quot;&gt;2000&lt;\/int&gt;/&#39;</span> /var/solr/data/draft_transaction/conf/solrconfig.xml</span></code></pre></div>
+<p>Then, run <code>nano /opt/solr/bin/solr</code> and add
+<code>SOLR_JAVA_MEM="-Xms20g -Xmx20g"</code> or alternatively, however
+much memory you choose to assign. Then, run
+<code>nano /opt/solr/server/etc/jetty.xml</code> and change in <em>LINE
+71</em>:
+<code>&lt;Set name="requestHeaderSize"&gt;&lt;Property name="solr.jetty.request.header.size" default="8192" /&gt;&lt;/Set&gt;</code>
+TO
+<code>&lt;Set name="requestHeaderSize"&gt;&lt;Property name="solr.jetty.request.header.size" default="65535" /&gt;&lt;/Set&gt;</code></p>
+<p>And restart Solr</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> service solr restart</span></code></pre></div>
+<h2 id="setup-1">Setup</h2>
+<h3 id="dependencies">Dependencies</h3>
+<p>Ensure the following services are running:</p>
+<ul>
+<li>Solr</li>
+<li>MongoDB</li>
+<li>PostgreSQL</li>
+<li>RabbitMQ</li>
+</ul>
+<h3 id="env-1">.env</h3>
+<p>Make sure to set up your local .env file, we’ve provided an example
+under <a href="../.env.example.local">.env.example.local</a>. The
+following is a table of fields in the .env file, their function and
+whether or not to change them.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field name</th>
+<th>Subsystem</th>
+<th>Functionality</th>
+<th>Changeable (No/Optional/Must)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>SECRET_KEY</code></td>
+<td>Django</td>
+<td>Secret key</td>
+<td>Must</td>
+</tr>
+<tr class="even">
+<td><code>DEBUG</code></td>
+<td>Django</td>
+<td>Impacts django settings</td>
+<td>Optional: change on production to False</td>
+</tr>
+<tr class="odd">
+<td><code>FRESH</code></td>
+<td>Direct Indexing</td>
+<td>Determines if a new dataset is downloaded</td>
+<td>Optional</td>
+</tr>
+<tr class="even">
+<td><code>THROTTLE_DATASET</code></td>
+<td>Direct Indexing</td>
+<td>Reduces the number of datasets indexed, can be used to have a fast
+local run of the indexing process.</td>
+<td>Optional: False in production</td>
+</tr>
+<tr class="odd">
+<td><code>DJANGO_STATIC_ROOT</code></td>
+<td>Django</td>
+<td>Determines where Django static files are served</td>
+<td>Optional: for local development</td>
+</tr>
+<tr class="even">
+<td><code>DJANGO_STATIC_URL</code></td>
+<td>Django</td>
+<td>Determines where Django static files are served</td>
+<td>Optional: for local development</td>
+</tr>
+<tr class="odd">
+<td><code>POSTGRES_HOST</code></td>
+<td>Postgres</td>
+<td>Host ip</td>
+<td>Optional</td>
+</tr>
+<tr class="even">
+<td><code>POSTGRES_PORT</code></td>
+<td>Postgres</td>
+<td>Host port</td>
+<td>Optional</td>
+</tr>
+<tr class="odd">
+<td><code>POSTGRES_DB</code></td>
+<td>Postgres</td>
+<td>Initial db name</td>
+<td>Optional</td>
+</tr>
+<tr class="even">
+<td><code>POSTGRES_USER</code></td>
+<td>Postgres</td>
+<td>Root user name</td>
+<td>Must</td>
+</tr>
+<tr class="odd">
+<td><code>POSTGRES_PASSWORD</code></td>
+<td>Postgres</td>
+<td>Root user pass</td>
+<td>Must</td>
+</tr>
+<tr class="even">
+<td><code>CELERY_BROKER_URL</code></td>
+<td>Celery</td>
+<td>Connection to the message broker like RabbitMQ. Form:
+<code>ampq://&lt;RABBITMQ HOST IP&gt;</code></td>
+<td>Optional: Depends on your broker</td>
+</tr>
+<tr class="odd">
+<td><code>FCDO_INSTANCE</code></td>
+<td>Direct Indexing</td>
+<td>Enables additional indexing features such as GBP conversion and JSON
+dump fields</td>
+<td>Optional: enable on FCDO instances</td>
+</tr>
+<tr class="even">
+<td><code>SOLR_ADMIN_USERNAME</code></td>
+<td>Solr</td>
+<td>Admin username</td>
+<td>Must</td>
+</tr>
+<tr class="odd">
+<td><code>SOLR_ADMIN_PASSWORD</code></td>
+<td>Solr</td>
+<td>Admin password</td>
+<td>Must</td>
+</tr>
+<tr class="even">
+<td><code>SOLR_BASE_URL</code></td>
+<td>Solr</td>
+<td>The connection string from python to solr. <em>(Substitute ports if
+necessary.)</em> Form with auth:
+<code>http://&lt;SOLR_ADMIN_USERNAME&gt;:&lt;SOLR_ADMIN_PASSWORD&gt;@&lt;SOLR HOST IP&gt;:8983/solr</code>,
+or without: <code>http://&lt;SOLR HOST IP&gt;:8983/solr</code></td>
+<td>Optional: If authentication is enabled</td>
+</tr>
+<tr class="odd">
+<td><code>SOLR_AUTH_ENCODED</code></td>
+<td>NGINX</td>
+<td>A Base64 encoding of
+<code>&lt;SOLR_ADMIN_USERNAME&gt;:&lt;SOLR_ADMIN_PASSWORD&gt;</code>. We
+use <a href="https://www.base64encode.org/">base64encode.org</a>.</td>
+<td>Must</td>
+</tr>
+<tr class="even">
+<td><code>MEM_SOLR_MIN</code></td>
+<td>Solr</td>
+<td>The minimum available Solr memory</td>
+<td>Optional</td>
+</tr>
+<tr class="odd">
+<td><code>MEM_SOLR_MAX</code></td>
+<td>Solr</td>
+<td>The maximum available Solr memory</td>
+<td>Optional</td>
+</tr>
+<tr class="even">
+<td><code>SOLR_VOLUME</code></td>
+<td>Solr</td>
+<td>Either the ‘docker volume’ solr_data, or a local mount directory
+like
+“SOLR_VOLUME=”/my/storage/iati.cloud/direct_indexing/solr_mount_dir”</td>
+<td>Optional</td>
+</tr>
+<tr class="odd">
+<td><code>CELERYFLOWER_USER</code></td>
+<td>Celery</td>
+<td>Flower access</td>
+<td>Must</td>
+</tr>
+<tr class="even">
+<td><code>CELERYFLOWER_PASSWORD</code></td>
+<td>Celery</td>
+<td>Flower access</td>
+<td>Must</td>
+</tr>
+<tr class="odd">
+<td><code>DJANGO_SUPERUSER_USERNAME</code></td>
+<td>Django</td>
+<td>Initial superuser account</td>
+<td>Must</td>
+</tr>
+<tr class="even">
+<td><code>DJANGO_SUPERUSER_PASSWORD</code></td>
+<td>Django</td>
+<td>Initial superuser account</td>
+<td>Must</td>
+</tr>
+<tr class="odd">
+<td><code>DJANGO_SUPERUSER_EMAIL</code></td>
+<td>Django</td>
+<td>Initial superuser account</td>
+<td>Must</td>
+</tr>
+<tr class="even">
+<td><code>MONGO_INITDB_ROOT_USERNAME</code></td>
+<td>MongoDB</td>
+<td>Initial superuser account</td>
+<td>Must</td>
+</tr>
+<tr class="odd">
+<td><code>MONGO_INITDB_ROOT_PASSWORD</code></td>
+<td>MongoDB</td>
+<td>Initial superuser account</td>
+<td>Must</td>
+</tr>
+<tr class="even">
+<td><code>MONGO_INITDB_DATABASE</code></td>
+<td>MongoDB</td>
+<td>Default MongoDB database. This is not changeable, but is required
+for the initialisation of MongoDB in fresh starts in docker.</td>
+<td>No, this must remain <code>activities</code></td>
+</tr>
+<tr class="odd">
+<td><code>MONGO_CONNECTION_STRING</code></td>
+<td>MongoDB</td>
+<td><code>mongodb://&lt;MONGO_INITDB_ROOT_USERNAME&gt;:&lt;MONGO_INITDB_ROOT_PASSWORD&gt;@&lt;MONGO HOST IP&gt;:27017</code></td>
+<td>Must</td>
+</tr>
+<tr class="even">
+<td><code>IC_DOMAIN</code></td>
+<td>NGINX</td>
+<td>The domain on which the current IATI.cloud setup is deployed,
+localhost in development, iati.cloud in production</td>
+<td>Optional, in production with domain pointed at the server</td>
+</tr>
+<tr class="odd">
+<td><code>CSRF_TRUSTED_ORIGINS</code></td>
+<td>Django</td>
+<td>Django trusted origins, like <code>https://iati.cloud</code> for
+iati.cloud. “A list of trusted origins for unsafe requests
+(e.g. POST).”</td>
+<td>Must</td>
+</tr>
+</tbody>
+</table>
+<h3 id="python">Python</h3>
+<p>Install create a virtual environment</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3.11</span> <span class="at">-m</span> venv ./env</span></code></pre></div>
+<p>Activate environment</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ./env/bin/activate</span></code></pre></div>
+<p>Upgrade pip</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">--upgrade</span> pip</span></code></pre></div>
+<h3 id="postgresql">PostgreSQL</h3>
+<p>Create a PostgreSQL database with name, username and password
+(example default values below)</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres psql</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="ex">create</span> database iati_cloud<span class="kw">;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="ex">create</span> user iati_cloud with encrypted password <span class="st">&#39;oipa&#39;</span><span class="kw">;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="ex">grant</span> all privileges on database iati_cloud to iati_cloud<span class="kw">;</span></span></code></pre></div>
+<p>Run the initial migration</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> manage.py migrate</span></code></pre></div>
+<p>Create a Django Admin user</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> manage.py createsuperuser</span></code></pre></div>
+<p>Enter a username and a password. Emails are not required but feel
+free to use yours.</p>
+<p>Preload the legacy currency conversion with data</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> manage.py loaddata ./services/iaticloud/data_preload/legacy_currency_convert_dump.json</span></code></pre></div>
+<h2 id="running-iati.cloud-manually">Running IATI.cloud manually</h2>
+<p>Run the django server:</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> manage.py runserver</span></code></pre></div>
+<p>Run celery workers:</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">celery</span> <span class="at">-A</span> iaticloud worker <span class="at">-l</span> INFO <span class="at">--concurrency</span><span class="op">=</span>32 <span class="at">-n</span> worker@%%h</span></code></pre></div>
+<p>Optionally run celery revoke queue:</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">celery</span> <span class="at">-A</span> iaticloud worker <span class="at">-l</span> INFO <span class="at">-n</span> revoke@%%h <span class="at">-Q</span> revoke_queue</span></code></pre></div>
+<p>Optionally run celery aida workers</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="ex">celery</span> <span class="at">-A</span> iaticloud worker <span class="at">-l</span> INFO <span class="at">--concurrency</span><span class="op">=</span>4 <span class="at">-n</span> aida@%%h <span class="at">-Q</span> aida_queue</span></code></pre></div>
+<p>Run celery beat</p>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="ex">celery</span> <span class="at">-A</span> iaticloud beat <span class="at">-l</span> INFO</span></code></pre></div>
+<p>Run celery flower</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">celery</span> <span class="at">-A</span> iaticloud flower <span class="at">-l</span> INFO <span class="at">--port</span><span class="op">=</span>5555</span></code></pre></div>
+<hr />
+<h2 id="usage-1">Usage</h2>
+<p><em>Check out the <a href="./USAGE.md">Usage guide</a> for your next
+steps.</em> # IATI.cloud dataset processing</p>
+<ul>
+<li><a href="#iaticloud-dataset-processing">IATI.cloud dataset
+processing</a>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#process-overview">Process overview</a>
+<ul>
+<li><a href="#indexing-the-dataset">Indexing the dataset</a>
+<ul>
+<li><a href="#cleaning">Cleaning</a></li>
+<li><a href="#adding-custom-fields">Adding custom fields</a></li>
+<li><a href="#extracting-subtypes">Extracting subtypes</a></li>
+<li><a href="#final-step">Final step</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#development-entry-points">Development entry
+points</a></li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="introduction-3">Introduction</h2>
+<p>The following is an explanation of the dataset processing flow for
+IATI.cloud.</p>
+<h2 id="process-overview">Process overview</h2>
+<p>We use the code4iati dataset metadata and publisher metadata dumps to
+access all of the available metadata.</p>
+<p>Publisher: We basically immediately index the publisher metadata as
+it is flat data.</p>
+<p>Dataset: We download the code4iati dataset dump to access all of the
+available IATI datasets from the IATI Registry. If <code>update</code>
+is true, we check whether or not the hash has changed from the already
+indexed datasets. We then loop the datasets within the dataset metadata
+dump and trigger the <code>subtask_process_dataset</code>. For each
+dataset we clean the dataset metadata (where we extract the nested
+<code>resources</code> and <code>extras</code>). We then retrieve the
+filepath of the actual downloaded dataset based on the organisation name
+and dataset name. We check if the version is valid (in this case version
+2). We get the type of the file from the metadata or the file content
+itself. We then check the dataset validation. Then we clear the existing
+data from this dataset if it is found in the IATI.cloud and the
+<code>update</code> flag is True. Then we trigger the <a
+href="#indexing-the-dataset">indexing of the actual dataset</a>. Once
+this is completed we store the success state of the latter to
+<code>iati_cloud_indexed</code> and we index the entire dataset
+metadata.</p>
+<h3 id="indexing-the-dataset">Indexing the dataset</h3>
+<p>First, we parse the IATI XML dataset. We then convert it to a dict
+using the BadgerFish algorithm.</p>
+<p>We apply our <a href="#cleaning">cleaning</a> and <a
+href="#adding-custom-fields">add custom fields</a>. We then dump the
+dataset dict into a JSON file. Latstly, we <a
+href="#extracting-subtypes">extract the subtypes (budget, result and
+transactions)</a></p>
+<h4 id="cleaning">Cleaning</h4>
+<p>We then recursively clean the dataset. <code>@</code> values are
+removed, <code>@{http://www.w3.org/XML/1998/namespace}lang</code> is
+replaced with <code>lang</code>, and key-value fields are extracted. <a
+href="../direct_indexing/cleaning/dataset.py">Read more here</a>.</p>
+<h4 id="adding-custom-fields">Adding custom fields</h4>
+<p>We have several “custom fields” that we enrich the IATI data
+with.</p>
+<ul>
+<li><a href="../direct_indexing/custom_fields/codelists.py">Codelist
+fields</a>: These fields are ‘name’ representations of numeric/code
+values in the IATI Standard, for example an activity can report
+<code>transaction-type.code: 3</code>. We then enrich the activity with
+<code>transaction-type.name: Disbursement</code>.</li>
+<li><a href="../direct_indexing/custom_fields/title_narrative.py">Title
+narrative</a>: We add a single-valued field with exclusively the
+first-reported title narrative.</li>
+<li><a href="../direct_indexing/custom_fields/activity_dates.py">Common
+activity dates</a>: We add single value common start and end dates, so
+we immediately know a start and an end-date without looking through the
+planned and actual fields.</li>
+<li><a
+href="../direct_indexing/custom_fields/activity_status.py">Activity
+status</a>: We add single value activity-status.text field, to present
+the textual status alongside the code.</li>
+<li><a
+href="../direct_indexing/custom_fields/policy_marker_combined.py">Combined
+policy marker</a>: We add <code>policy-marker.combined</code> which is
+the policy marker code and its connected significance together.</li>
+<li><a
+href="../direct_indexing/custom_fields/currency_conversion.py">Currency
+conversion</a>: Explained in depth <a
+href="./USAGE.md#legacy-currency-convert">here</a>.</li>
+<li><a
+href="../direct_indexing/custom_fields/dataset_metadata.py">Dataset
+metadata</a>: We add interesting dataset metadata fields to the
+activity.</li>
+<li><a
+href="../direct_indexing/custom_fields/add_default_hierarchy.py">Hierarchy
+default value</a>: “If hierarchy is not reported then 1 is assumed.”.
+Ensure this is enforced.</li>
+<li><a href="../direct_indexing/custom_fields/json_dumps.py">JSON
+dumps</a>: A stringified JSON object of different IATI activity
+fields.</li>
+<li><a href="../direct_indexing/custom_fields/date_quarters.py">Date
+quarters</a>: For each iso-date reported, also include a field in which
+quarter they are.</li>
+<li><a
+href="../direct_indexing/custom_fields/document_link_category_combined.py">Document
+link categories</a>: Provides a combined list of all the category codes
+for each document-link.</li>
+<li><a
+href="../direct_indexing/custom_fields/currency_aggregation.py">Currency
+aggregation</a>: We add converted and aggregated values for budgets,
+disbursements and transactions/transaction subtypes.</li>
+<li><a
+href="../direct_indexing/custom_fields/raise_h2_budget_data_to_h1.py">Related
+activity data to parent activity</a>: This ‘raises’ related activity
+budget data from the H2 activities to the H1 activities.</li>
+</ul>
+<p><a href="../direct_indexing/custom_fields/custom_fields.py">Check it
+out in depth here</a></p>
+<h4 id="extracting-subtypes">Extracting subtypes</h4>
+<p>We extract the subtypes to single valued fields. <a
+href="../direct_indexing/processing/activity_subtypes.py">Read more
+here</a>.</p>
+<p>Each of these is indexed separately into its respective core.</p>
+<h4 id="final-step">Final step</h4>
+<p>Lastly, if the previous steps were all successful, we index the IATI
+activity data.</p>
+<h2 id="development-entry-points">Development entry points</h2>
+<ul>
+<li><a href="../iaticloud/settings.py">Django settings</a>: contains the
+settings (set by the .env file).</li>
+<li>AIDA
+<ul>
+<li><a href="../iaticloud/urls.py">Django urls</a>: contains the
+accessible Django API REST endpoints.</li>
+<li><a href="../iaticloud/views.py">Django views</a>: contains the
+functions used in Django URLS.</li>
+</ul></li>
+<li>NGINX
+<ul>
+<li>The directory <code>scripts/setup/nginx_host_machine</code> contains
+the Nginx configuration for iati.cloud</li>
+</ul></li>
+<li>Tests
+<ul>
+<li>The directory <code>tests/direct_indexing</code> contains the tests
+for the <code>direct_indexing</code> module.</li>
+</ul></li>
+<li>The <a href="../.pre-commit-config.yaml">pre-commit config</a>
+ensures proper git commit etiquette, along with the <a
+href="../commitlint.config.js">commitlint</a>.</li>
+<li><code>legacy_currency_convert</code>: The original IMF rate parser
+that was implemented before the full IATI.cloud rewrite, and reused for
+currency conversion. Work from <a
+href="../legacy_currency_convert/tasks.py">tasks.py</a></li>
+<li><code>direct_indexing</code>: The IATI.cloud rewrite result,
+originally, datasets were processed into a Django postgres database,
+after which the dataset was retrieved and converted to a Solr dataset.
+This can be reviewed under the git branch
+<code>archive/iati-cloud-hybrid-django-solr</code>. The main entrypoint
+here is <a href="../direct_indexing/tasks.py">tasks.py</a>.</li>
+<li>Django admin
+<ul>
+<li>See <a href="./USAGE.md#task-management">USAGE.md -&gt; task
+management</a> # SCRIPTS</li>
+</ul></li>
+</ul>
+<p>There are many scripts available. The following is a table displaying
+their function. For intricate details, use the -h or –help flag when
+running the script with bash, or simply open the scripts and read.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Script name</th>
+<th>Category</th>
+<th>Function</th>
+<th>Sudo (root access) required</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../scripts/build.sh">build.sh</a></td>
+<td>Docker core</td>
+<td>Simple trigger for <code>docker compose build</code></td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td><a
+href="../scripts/clear_celery_queues.sh">clear_celery_queues.sh</a></td>
+<td>Utility</td>
+<td>Clear all items in all celery queues</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td><a href="../scripts/cov.sh">cov.sh</a></td>
+<td>Development</td>
+<td>Run the tests written for the ./direct_indexing module</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td><a href="../scripts/download_fcdo.sh">download_fcdo.sh</a></td>
+<td>Utility</td>
+<td>Based on requests by FCDO, re-downloads FCDO datasets</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td><a href="../scripts/restart.sh">restart.sh</a></td>
+<td>Development</td>
+<td>Restart the docker services based on the python code, to immediately
+utilise the latest code as written locally.</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td><a href="../scripts/select_env.sh">select_env.sh</a></td>
+<td>Utility</td>
+<td>Activates the desired environment in case of having multiple
+environments present.</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td><a href="../scripts/setup.sh">setup.sh</a></td>
+<td>Setup</td>
+<td>Main setup script, triggers subscripts after asking if they should
+be triggered</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td><a
+href="../scripts/setup/install_cockpit.sh">setup/install_cockpit</a></td>
+<td>Setup</td>
+<td>Installs <code>cockpit</code></td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td><a
+href="../scripts/setup/install_docker.sh">setup/install_docker</a></td>
+<td>Setup</td>
+<td>Installs <code>docker</code></td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td><a
+href="../scripts/setup/install_nginx.sh">setup/install_nginx</a></td>
+<td>Setup</td>
+<td>Installs <code>NGINX</code> and <code>Certbot</code>, optionally
+triggers nginx and certbot setups.</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td><a
+href="../scripts/setup/install_submodules.sh">setup/install_submodules</a></td>
+<td>Setup</td>
+<td>Inits and updates the git submodule, copies the static directory for
+the Django admin panel</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td><a
+href="../scripts/setup/setup_environment.sh">setup/setup_environment</a></td>
+<td>Setup</td>
+<td>Creates .env files, symlinks the selected one, requests information
+such as usernames and passwords and updates the .env files</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td><a href="../scripts/setup/setup_nginx.sh">setup/setup_nginx</a></td>
+<td>Setup</td>
+<td>Updates the machine’s Nginx configuration with the required
+information</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td><a
+href="../scripts/setup/setup_solr_mount_dir.sh">setup/setup_solr_mount_dir</a></td>
+<td>Setup</td>
+<td>Creates the solr_data directory where the user wants to mount their
+solr data.</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td><a href="../scripts/setup/setup_solr.sh">setup/setup_solr</a></td>
+<td>Setup</td>
+<td>Creates and triggers the configuration of the Solr docker image</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td><a href="../scripts/setup/setup_ssl.sh">setup/setup_ssl</a></td>
+<td>Setup</td>
+<td>Sets up SSL certificates for the Nginx configuration</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td><a href="../scripts/setup/setup_swap.sh">setup/setup_swap</a></td>
+<td>Setup</td>
+<td>Sets up swap space</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td><a href="../scripts/start.sh">start.sh</a></td>
+<td>Docker core</td>
+<td>Starts specified services</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td><a href="../scripts/stop.sh">stop.sh</a></td>
+<td>Docker core</td>
+<td>Stops specified services</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td><a
+href="../scripts/update_solr_cores.sh">update_solr_cores.sh</a></td>
+<td>Utility</td>
+<td>Updates the solr cores with updated configuration</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td><a href="../scripts/util.sh">util.sh</a></td>
+<td>Utility</td>
+<td>Contains utility functions for use across scripts directory, never
+accessed directly as it has no function</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h1 id="using-iati.cloud">Using IATI.cloud</h1>
+<ul>
+<li><a href="#using-iaticloud">Using IATI.cloud</a>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#administration">Administration</a>
+<ul>
+<li><a href="#celery-results">Celery results</a></li>
+<li><a href="#legacy-currency-convert">Legacy currency convert</a></li>
+<li><a href="#task-management">Task management</a>
+<ul>
+<li><a href="#tasks-overview">Tasks overview</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#querying-data">Querying data</a>
+<ul>
+<li><a href="#querying-tips">Querying tips</a></li>
+</ul></li>
+<li><a href="#appendices">Appendices</a>
+<ul>
+<li><a href="#1-django-admin-interface">1. Django admin
+interface</a></li>
+<li><a href="#2-django-celery-task-results">2. django Celery Task
+results</a></li>
+<li><a href="#3-celery-flower">3. Celery Flower</a></li>
+</ul></li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="introduction-4">Introduction</h2>
+<p>This file will contain a guide to how to use IATI.cloud as an
+administrator, from zero to a fully indexed IATI dataset, as well as
+some tips on querying data.</p>
+<h2 id="administration">Administration</h2>
+<p>The IATI.cloud process is managed from Django. In the Django admin
+interface you can trigger the ‘Periodic tasks’, which execute things
+like clearing all of the Solr cores, indexing the entire IATI dataset,
+or indexing subsets, more about this in <a
+href="#task-management">tasks</a>.</p>
+<p>The Django Administration interface, as seen in <a
+href="#1-django-admin-interface">appendix 1</a> contains some user
+management, <a href="#celery-results">celery results</a>, <a
+href="#legacy-currency-convert">legacy currency convert</a> and <a
+href="#task-management">periodic tasks</a>.</p>
+<h3 id="celery-results">Celery results</h3>
+<p>The <a href="#2-django-celery-task-results">django celery results
+page</a> is similar to the <a href="#3-celery-flower">Celery Flower
+interface</a>, the interface shows all of the dispatched tasks and their
+states. Results can be read here as well. In the Celery Flower interface
+you can also terminate running tasks, in case of necessity. These
+interfaces should be used to inspect tasks and task results.</p>
+<h3 id="legacy-currency-convert">Legacy currency convert</h3>
+<p>This is a feature that was developed initially for the IATI.cloud to
+enable currency conversion. It is a best-effort using the <a
+href="https://www.imf.org/external/np/fin/ert/GUI/Pages/Report.aspx?Type=XML&amp;CU=%27EUR%27,%27JPY%27,%27GBP%27,%27USD%27,%27DZD%27,%27AUD%27,%27ATS%27,%27BHD%27,%27BEF%27,%27VEF%27,%27BWP%27,%27BRL%27,%27BND%27,%27CAD%27,%27CLP%27,%27CNY%27,%27COP%27,%27CYP%27,%27CZK%27,%27DKK%27,%27DEM%27,%27FIM%27,%27FRF%27,%27GRD%27,%27HUF%27,%27ISK%27,%27INR%27,%27IDR%27,%27IRR%27,%27IEP%27,%27ILS%27,%27ITL%27,%27KZT%27,%27KRW%27,%27EEK%27,%27KWD%27,%27LYD%27,%27LUF%27,%27MYR%27,%27MTL%27,%27MUR%27,%27MXN%27,%27NPR%27,%27NLG%27,%27NZD%27,%27NOK%27,%27PEN%27,%27PKR%27,%27UYU%27,%27PHP%27,%27PLN%27,%27PTE%27,%27QAR%27,%27OMR%27,%27RUB%27,%27SAR%27,%27SGD%27,%27SKK%27,%27SIT%27,%27ZAR%27,%27ESP%27,%27LKR%27,%27SEK%27,%27CHF%27,%27THB%27,%27TTD%27,%27TND%27,%27AED%27,%27VEB%27&amp;EX=SDRC&amp;P=DateRange&amp;CF=UnCompressed&amp;CUF=Period&amp;DS=Ascending&amp;DT=NA">International
+Monetary Fund’s (IMF) monthly exchange rates in the form of SDR per
+currency unit</a>, to extract as many conversion data points as
+possible, and converting the values that are in IATI Datasets at the
+exact value-date, meaning the conversion is applied at the moment of the
+value’s activity, rather than “now” resulting in more accurate
+conversion of the value.</p>
+<h3 id="task-management">Task management</h3>
+<p>To manage tasks in IATI.cloud, you will want to go to
+<code>host:8000/admin/django_celery_beat/periodictask/</code>, or simply
+<code>https://iati.cloud/admin/django_celery_beat/periodictask</code> on
+a live environment, substituting iati.cloud with your domain.</p>
+<p>If the following core tasks do not exist, create them. The core tasks
+are:</p>
+<ul>
+<li>Clear all cores:
+<ul>
+<li>Task: <code>direct_indexing.tasks.clear_all_cores</code></li>
+<li>Interval schedule: every second</li>
+<li>One-off Task: checked</li>
+<li>Arguments:
+<ul>
+<li>Keyword Arguments: <code>{}</code></li>
+</ul></li>
+</ul></li>
+<li>Index all:
+<ul>
+<li>Task: <code>direct_indexing.tasks.start</code></li>
+<li>Interval schedule: every second</li>
+<li>One-off Task: checked</li>
+<li>Arguments:
+<ul>
+<li>Keyword Arguments: <code>{"update": 1}</code></li>
+</ul></li>
+</ul></li>
+<li>Incremental Update for Direct Indexing:
+<ul>
+<li>Task: <code>direct_indexing.tasks.start</code></li>
+<li>Interval schedule: every 3 hours</li>
+<li>One-off Task: not checked</li>
+<li>Arguments:
+<ul>
+<li>Keyword Arguments: <code>{"update": 1}</code></li>
+</ul></li>
+</ul></li>
+</ul>
+<p>If the final task is enabled, every 3 hours, IATI.cloud will update
+to contain the latest found IATI data files.</p>
+<h4 id="tasks-overview">Tasks overview</h4>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Task</th>
+<th>Interface name</th>
+<th>Functionality</th>
+<th>Setup and arguments</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>celery.backend_cleanup</td>
+<td>celery.backend_cleanup</td>
+<td>Cleans up Celery backend</td>
+<td>Automatic setup, every day on a crontab schedule</td>
+</tr>
+<tr class="even">
+<td>legacy_currency_convert.tasks.update_exchange_rates</td>
+<td>Update the exchange rates</td>
+<td>Updates the exchange rates using <a
+href="#legacy-currency-convert">legacy currency convert</a></td>
+<td>Automatic setup, every day on a crontab schedule</td>
+</tr>
+<tr class="odd">
+<td>legacy_currency_convert.tasks.dump_exchange_rates</td>
+<td>Dump exchange rates</td>
+<td>Creates a JSON file for the direct indexing process</td>
+<td>This is a subtask which is used by the system, not necessary as a
+runnable task</td>
+</tr>
+<tr class="even">
+<td>direct_indexing.metadata.dataset.subtask_process_dataset</td>
+<td>Process dataset metadata</td>
+<td>Starts the indexing of a provided dataset, updates the existing
+dataset in Solr if necessary</td>
+<td>This is a subtask which is used by the system, not necessary as a
+runnable task.<br /><strong>arguments</strong>:<br />- dataset: a
+dataset metadata dict<br />- update: a boolean flag whether or not to
+update the dataset.</td>
+</tr>
+<tr class="odd">
+<td>direct_indexing.tasks.aida_async_drop</td>
+<td>AIDA Drop data</td>
+<td>Remove provided (draft) data, possible through Django admin, but
+meant to be used by the Django url <code>host:8000/aida/drop</code></td>
+<td>arguments:<br />-ds_name: literal name of the dataset.<br />-draft:
+(optional), if 1, the data is dropped from the draft core.</td>
+</tr>
+<tr class="even">
+<td>direct_indexing.tasks.aida_async_index</td>
+<td>AIDA Index data</td>
+<td>Index provided (draft) data, possible through Django admin, but
+meant to be used by the Django url
+<code>host:8000/aida/index</code></td>
+<td>arguments:<br />-dataset: Json IATI registry dataset
+metadata.<br />-publisher: name of the publisher.<br />-ds_name: name of
+the dataset.<br />-ds_url: url of the dataset to be
+downloaded.<br />-draft: (optional), if 1, the data is dropped from the
+draft core.</td>
+</tr>
+<tr class="odd">
+<td>direct_indexing.tasks.clear_all_cores</td>
+<td>Clear all cores</td>
+<td>Removes all of the data from all of the <a
+href="#querying-data">endpoints</a></td>
+<td>Manual setup, every second and tick the <code>one-off task</code>
+checkbox.</td>
+</tr>
+<tr class="even">
+<td>direct_indexing.tasks.fcdo_replace_partial_url</td>
+<td>FCDO Replace partial url matches</td>
+<td>Used to update a dataset based on the provided URL. For example, if
+an existing dataset has the url ‘example.com/a.xml’, and a staging
+dataset is prepared at ‘staging-example.com/a.xml’, the file is
+downloaded and the iati datastore is refreshed with the new content for
+this file.<br /><br />Note: if the setting “FRESH” is active, and the
+datastore is incrementally updating, the custom dataset will be
+overwritten by the incremental update. If this feature is used, either
+disable the incremental updates (admin panel), or set the Fresh setting
+to false (source code).</td>
+<td>Manual setup, every second and tick the <code>one-off task</code>
+checkbox.<br /><strong>arguments</strong>:<br />- find_url: the url to
+be replaced<br />- replace_url: the new url</td>
+</tr>
+<tr class="odd">
+<td>direct_indexing.tasks.revoke_all_tasks</td>
+<td>Revoke all tasks</td>
+<td>Cancels every task that is currently queued (does not cancel tasks
+currently being executed by Celery Workers).</td>
+<td>Manual setup, every second and tick the <code>one-off task</code>
+checkbox.</td>
+</tr>
+<tr class="even">
+<td>direct_indexing.tasks.start</td>
+<td>Start IATI.cloud indexing</td>
+<td>Triggers an update for the IATI.cloud, downloads the latest metadata
+and dataset dump, and processes it.</td>
+<td>Manual setup, every second and tick the <code>one-off task</code>
+checkbox.<br />Alternatively, this can be set up on a crontab schedule
+every three (3) hours, as the dataset dump updates every three hours
+(note:remove the <code>one-off task</code>
+tick)</br><strong>arguments</strong>:</br>- update: a boolean flag which
+indicates if the IATI.cloud should be updated. If <code>True</code>, the
+existing activities are updated, if <code>False</code>, drops all the
+data from the solr cores and does a complete re-index.<br />- drop: a
+boolean flag which indicates whether or not older datasets (no longer
+available in this indexing cycle) should be removed from
+IATI.cloud.</td>
+</tr>
+<tr class="odd">
+<td>direct_indexing.tasks.subtask_dataset_metadata</td>
+<td>Dataset metadata subtask</td>
+<td>Processes and indexes dataset metadata. This process also tringgers
+a dataset indexing task for every dataset metadata dict</td>
+<td>This is a subtask which is used by the system, not necessary as a
+runnable task</td>
+</tr>
+<tr class="even">
+<td>direct_indexing.tasks.subtask_publisher_metadata</td>
+<td>Publisher metadata subtask</td>
+<td>Processes and indexes publisher metadata</td>
+<td>This is a subtask which is used by the system, not necessary as a
+runnable task</td>
+</tr>
+<tr class="odd">
+<td>direct_indexing.tasks.index_custom_dataset</td>
+<td>Manually index a dataset with an URL</td>
+<td>Manually indexes the provided dataset. The user needs to provide a
+URL, dataset title, dataset name (no spaces, for example fcdo_set-13 or
+finland_mfa-001), and organisation name.</td>
+<td>Manual setup, every second and tick the <code>one-off task</code>
+checkbox.<br /></br><strong>arguments</strong>:</br>- url: the string of
+the XML Dataset URL.</br>- title: A fancy title for the dataset.</br>-
+name: A no-space dataset name.</br>- org: The organisation name.</td>
+</tr>
+<tr class="even">
+<td>direct_indexing.tasks.remove_custom_dataset</td>
+<td>Manually remove a custom dataset</td>
+<td>Removes the provided custom indexed dataset.</td>
+<td>Manual setup, every second and tick the <code>one-off task</code>
+checkbox.<br /></br><strong>arguments</strong>:</br>- dataset_id: The id
+of the dataset to be removed, can be found in the <em>dataset</em>
+core.</br>- name: A no-space dataset name.</br>- org: The organisation
+name.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="querying-data">Querying data</h2>
+<p>IATI.cloud data can be accessed through it’s endpoints:</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Core</th>
+<th>IATI.cloud endpoint</th>
+<th>Available fields</th>
+<th>IATI Reference</th>
+<th>Requires authentication header</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Activity</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/activity/?q=*:*">datastore.iati.cloud/api/v2/activity/?q=*:*</a></td>
+<td><a
+href="../direct_indexing/solr/cores/activity/managed-schema">activity
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/activity-standard/summary-table/">IATI
+Activity</a></td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Budget</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/budget/?q=*:*">datastore.iati.cloud/api/v2/budget/?q=*:*</a></td>
+<td><a href="../direct_indexing/solr/cores/budget/managed-schema">budget
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/activity-standard/iati-activities/iati-activity/budget/">IATI
+Budget</a></td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Dataset</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/dataset/?q=*:*">datastore.iati.cloud/api/v2/dataset/?q=*:*</a></td>
+<td><a
+href="../direct_indexing/solr/cores/dataset/managed-schema">dataset
+managed-schema</a></td>
+<td><a href="https://registry.codeforiati.org/dataset_list.json">Dataset
+metadata</a></td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Organisation</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/organisation/?q=*:*">datastore.iati.cloud/api/v2/organisation/?q=*:*</a></td>
+<td><a
+href="../direct_indexing/solr/cores/organisation/managed-schema">organisation
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/organisation-standard/summary-table/">IATI
+Organisation</a></td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Publisher</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/publisher/?q=*:*">datastore.iati.cloud/api/v2/publisher/?q=*:*</a></td>
+<td><a
+href="../direct_indexing/solr/cores/publisher/managed-schema">publisher
+managed-schema</a></td>
+<td><a
+href="https://registry.codeforiati.org/publisher_list.json">Publisher
+metadata</a></td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Result</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/result/?q=*:*">datastore.iati.cloud/api/v2/result/?q=*:*</a></td>
+<td><a href="../direct_indexing/solr/cores/result/managed-schema">result
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/activity-standard/iati-activities/iati-activity/result/">IATI
+Result</a></td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td>Transaction</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/transaction/?q=*:*">datastore.iati.cloud/api/v2/transaction/?q=*:*</a></td>
+<td><a
+href="../direct_indexing/solr/cores/transaction/managed-schema">transaction
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/activity-standard/iati-activities/iati-activity/transaction/">IATI
+Transaction</a></td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>AIDA Draft Activity</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/draft_activity/?q=*:*">datastore.iati.cloud/api/v2/draft_activity/?q=*:*</a></td>
+<td><a
+href="../direct_indexing/solr/cores/activity/managed-schema">activity
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/activity-standard/iati-activities/iati-activity/activity/">IATI
+Activity</a></td>
+<td>Yes, base64 encoded solr user:pass</td>
+</tr>
+<tr class="odd">
+<td>AIDA Draft Budget</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/draft_budget/?q=*:*">datastore.iati.cloud/api/v2/draft_budget/?q=*:*</a></td>
+<td><a href="../direct_indexing/solr/cores/budget/managed-schema">budget
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/activity-standard/iati-activities/iati-activity/budget/">IATI
+Budget</a></td>
+<td>Yes, base64 encoded solr user:pass</td>
+</tr>
+<tr class="even">
+<td>AIDA Draft Dataset</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/draft_dataset/?q=*:*">datastore.iati.cloud/api/v2/draft_dataset/?q=*:*</a></td>
+<td><a
+href="../direct_indexing/solr/cores/dataset/managed-schema">dataset
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/activity-standard/iati-activities/iati-activity/dataset/">IATI
+Dataset</a></td>
+<td>Yes, base64 encoded solr user:pass</td>
+</tr>
+<tr class="odd">
+<td>AIDA Draft Result</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/draft_result/?q=*:*">datastore.iati.cloud/api/v2/draft_result/?q=*:*</a></td>
+<td><a href="../direct_indexing/solr/cores/result/managed-schema">result
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/activity-standard/iati-activities/iati-activity/result/">IATI
+Result</a></td>
+<td>Yes, base64 encoded solr user:pass</td>
+</tr>
+<tr class="even">
+<td>AIDA Draft Transaction</td>
+<td><a
+href="https://datastore.iati.cloud/api/v2/draft_transaction/?q=*:*">datastore.iati.cloud/api/v2/draft_transaction/?q=*:*</a></td>
+<td><a
+href="../direct_indexing/solr/cores/transaction/managed-schema">transaction
+managed-schema</a></td>
+<td><a
+href="https://iatistandard.org/en/iati-standard/203/activity-standard/iati-activities/iati-activity/transaction/">IATI
+Transaction</a></td>
+<td>Yes, base64 encoded solr user:pass</td>
+</tr>
+</tbody>
+</table>
+<h3 id="querying-tips">Querying tips</h3>
+<p>Here are some tips on how to write effective queries for Solr:</p>
+<ul>
+<li>Use clear and concise search terms: Make sure that your search terms
+accurately reflect what you are looking for. Avoid using vague or
+ambiguous terms that could lead to irrelevant results.</li>
+<li>Use advanced search features: Solr supports a range of advanced
+search features, including phrase queries, wildcards, fuzzy search, and
+proximity search. Make use of these features to refine your search and
+get more accurate results.
+<ul>
+<li>Phrase queries: Use double quotes to search for an exact phrase,
+such as “data science”. This will return results that contain the exact
+phrase “data science”.</li>
+<li>Wildcards: Use the asterisk (*) as a wildcard to match any number of
+characters, such as “data” to match “data”, “database”, “data science”,
+etc. You can also use a question mark (?) to match a single
+character.</li>
+<li>Fuzzy search: Use the tilde () followed by a number to search for
+terms that are similar to your search term, such as “data1” to match
+“data” and “date”. The number indicates the maximum number of edits
+(e.g., insertions, deletions, substitutions) that are allowed to make a
+match.</li>
+<li>Proximity search: Use the tilde (~) followed by a number to search
+for terms that occur within a certain distance of each other, such as
+“~data science5” to match “data” and “science” if they occur within five
+words of each other.</li>
+<li>Boolean operators: Use Boolean operators (AND, OR, NOT) to combine
+search terms, such as “data AND science” to find results that contain
+both “data” and “science”.</li>
+<li>Boosting: Use the caret (^) followed by a number to boost the
+relevance of a particular search term, such as “data^3 science” to give
+more weight to “data” in the search results.</li>
+<li>Field-specific search: Use the syntax “fieldname:searchterm” to
+search for a term within a specific field, such as “title:data science”
+to search for the term “data science” only in the title field.</li>
+</ul></li>
+<li>Use filters to narrow down results: Solr supports a range of
+filtering options, including range filters, boolean filters, and facet
+filters. These can be used to narrow down search results to specific
+categories or ranges of data.
+<ul>
+<li>Range filters: Use range filters to filter search results based on a
+specific range of values, such as a date range or a price range. For
+example, you can use the syntax “price:[10 TO 100]” to filter results to
+items with a price between 10 and 100.</li>
+<li>Boolean filters: Use boolean filters to filter search results based
+on specific criteria, such as whether a field is present or absent, or
+whether a field matches a specific value. For example, you can use the
+syntax “category:electronics AND in_stock:true” to filter results to
+electronics that are currently in stock.</li>
+<li>Facet filters: Use facet filters to filter search results based on
+specific categories, such as brand, category, or price range. This
+allows users to refine their search results by selecting specific
+facets, such as a specific brand or price range. For example, you can
+use the syntax
+“fq=category:electronics&amp;facet.field=brand&amp;facet.field=price_range”
+to display facets for brand and price range for the electronics
+category.</li>
+<li>Sorting: Use sorting to sort search results based on specific
+criteria, such as relevance, price, or date. This allows users to see
+the most relevant or useful search results first. For example, you can
+use the syntax “sort=price asc” to sort search results by price in
+ascending order.</li>
+</ul></li>
+<li>Using date filtering and searching:
+<ul>
+<li>Range filters: Solr allows you to use range filters to filter search
+results based on a specific range of dates. For example, you can use the
+syntax “created_at:[2022-01-01T00:00:00Z TO 2022-12-31T23:59:59Z]” to
+filter results to items created within the year 2022. This will match
+any documents where the “created_at” field falls within the specified
+date range.</li>
+<li>Date math: Solr provides a date math syntax that allows you to
+specify relative dates based on the current date, such as “NOW/DAY” to
+represent the start of the current day. For example, you can use the
+syntax “created_at:[NOW-1MONTH/DAY TO NOW/DAY]” to filter results to
+items created within the past month.</li>
+<li>Boosting: Solr allows you to boost search results based on the
+recency of the date. For example, you can use the syntax
+“recency_factor=linear(ms(NOW,created_at),1,0.1)” to give a higher score
+to more recent documents, which can help them appear higher in the
+search results.</li>
+<li>Sorting: Solr allows you to sort search results based on the date
+field. For example, you can use the syntax “sort=created_at desc” to
+sort search results in descending order based on the “created_at”
+field.</li>
+<li>Faceting: Solr allows you to facet search results based on date
+ranges, which can help users refine their search results based on
+specific date ranges. For example, you can use the syntax
+“fq=created_at:[NOW-1YEAR TO
+NOW]&amp;facet.range=created_at&amp;facet.range.start=NOW-1YEAR&amp;facet.range.end=NOW&amp;facet.range.gap=%2B1MONTH”
+to display facets for documents created within the past year, broken
+down by month.</li>
+</ul></li>
+<li>Use boosting to prioritize certain results: Boosting can be used to
+give higher priority to certain search results based on specific
+criteria, such as relevance, recency, or popularity.</li>
+<li>Test and refine your queries: Solr provides a range of tools for
+testing and refining your queries, including the Query Debugging tool
+and the Explain tool. Use these tools to identify any issues with your
+queries and make improvements as needed.</li>
+<li>Make use of relevance scoring: Solr uses a relevance scoring system
+to rank search results based on their relevance to the search terms.
+Make use of this system to ensure that the most relevant results are
+displayed first.</li>
+</ul>
+<hr />
+<h2 id="appendices">Appendices</h2>
+<h3 id="django-admin-interface">1. Django admin interface</h3>
+<figure>
+<img src="./images/admin_interface.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h3 id="django-celery-task-results">2. django Celery Task results</h3>
+<figure>
+<img src="./images/task_results.png" alt="image" />
+<figcaption aria-hidden="true">image</figcaption>
+</figure>
+<h3 id="celery-flower">3. Celery Flower</h3>
+<p>Main interface: <img src="./images/celeryflower.png"
+alt="image" /></p>
+<p>Specific task result: <img src="./images/celeryflower_result.png"
+alt="image" /></p>

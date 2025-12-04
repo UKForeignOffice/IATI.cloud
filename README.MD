@@ -22,6 +22,7 @@
     - [How should I contribute?](#how-should-i-contribute)
   - [Who makes or made use of IATI.cloud?](#who-makes-or-made-use-of-iaticloud)
   - [Branches](#branches)
+  - [Index](#index)
 
 ---
 
@@ -162,3 +163,20 @@ Python already has clear PEP 8 code style guidelines, so it's difficult to add s
 - `archive/iati-cloud-hybrid-django-solr` - django based "OIPA" version of IATI.cloud. Decommissioned around halfway through 2022.
 
 Other branches should be prefixed similarly to commits, like `docs/added-usage-readme`
+
+## Index
+
+We provide [an index file](./docs/index.html), which serves as a front facing page for iati.cloud. Currently, the index is created with pandoc, by combining the README and the markdown files in `./docs`.
+
+To update the index:
+
+1. make sure pandoc is installed: `sudo apt-get update && sudo apt-get install -y pandoc`
+2. Run `bash scripts/update_docs_index.sh` from the IATI.cloud root directory. Or do it manually with:
+
+```bash
+cat README.MD ./docs/*.md > ./docs/combined.md
+pandoc ./docs/combined.md -o ./docs/index.html
+rm ./docs/combined.md
+```
+
+Ensure this is pushed to the correct branch or change the branch on [github -> settings -> pages](https://github.com/zimmerman-team/IATI.cloud/settings/pages).
