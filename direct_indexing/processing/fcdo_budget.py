@@ -302,7 +302,7 @@ def _create_fcdo_budget_item(iati_id, hierarchy, db, budget_type, budget_start, 
         item['dac5-sector.code'] = dac5_s_c
         item['dac5-sector.name'] = dac5_name
     # Take the first 3 characters from any given sector code, if dac5, becomes dac3, if dac3, stays dac3
-    sector_code = int(str(sector_code)[:3])
+    sector_code = int(str(sector_code)[:3]) if sector_code != '' else ''
     dac3_name = DAC3.get(sector_code, '')
     if sector_code in DAC3:
         item['dac3-sector.code'] = sector_code
