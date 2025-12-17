@@ -1,8 +1,8 @@
 # IATI.cloud
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=zimmerman-zimmerman_iati.cloud&metric=alert_status)](https://sonarcloud.io/dashboard?id=zimmerman-zimmerman_iati.cloud)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Open issues](https://img.shields.io/github/issues/zimmerman-zimmerman/OIPA.svg?style=flat)](https://github.com/zimmerman-team/iati.cloud/issues)
+[![SonarCloud Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=zimmerman-zimmerman_iati.cloud&metric=alert_status "Quality Gate Status")](https://sonarcloud.io/dashboard?id=zimmerman-zimmerman_iati.cloud)
+[![MIT License Badge](https://img.shields.io/badge/License-MIT-yellow.svg "Licensed under MIT")](https://opensource.org/licenses/MIT)
+[![GitHub Open Issues Count](https://img.shields.io/github/issues/zimmerman-zimmerman/OIPA.svg?style=flat "Open Issues")](https://github.com/zimmerman-team/iati.cloud/issues)
 
 ---
 
@@ -22,6 +22,7 @@
     - [How should I contribute?](#how-should-i-contribute)
   - [Who makes or made use of IATI.cloud?](#who-makes-or-made-use-of-iaticloud)
   - [Branches](#branches)
+  - [Index](#index)
 
 ---
 
@@ -29,11 +30,11 @@
 
 IATI.cloud extracts all published IATI XML files from the [IATI Registry](http://www.iatiregistry.org/publisher) and stores all data in Apache Solr cores, allowing for fast access.
 
-IATI is a global aid transparency standard and it makes information about aid spending easier to access, re-use and understand the underlying data using a unified open standard. You can find more about the IATI data standard at: [www.iatistandard.org](www.iatistandard.org)
+IATI is a global aid transparency standard and it makes information about aid spending easier to access, re-use and understand the underlying data using a unified open standard. You can find more about the IATI data standard at the [IATI Standard website](https://www.iatistandard.org)
 
 We have recently moved towards a Solr Only version of the IATI.cloud. If you are looking for the hybrid IATI.cloud with Django API and Solr API, you can find this under the branch `archive/iati-cloud-hybrid-django-solr`
 
-You can install this codebase using Docker. Follow the Docker Guide for more information.
+You can install this codebase using Docker. Follow the [Docker installation guide](./docs/DOCKER.md) for more information.
 
 ## Setting up, running and using IATI cloud
 
@@ -162,3 +163,20 @@ Python already has clear PEP 8 code style guidelines, so it's difficult to add s
 - `archive/iati-cloud-hybrid-django-solr` - django based "OIPA" version of IATI.cloud. Decommissioned around halfway through 2022.
 
 Other branches should be prefixed similarly to commits, like `docs/added-usage-readme`
+
+## Index
+
+We provide [an index file](./docs/index.html), which serves as a front facing page for iati.cloud. Currently, the index is created with pandoc, by combining the README and the markdown files in `./docs`.
+
+To update the index:
+
+1. make sure pandoc is installed: `sudo apt-get update && sudo apt-get install -y pandoc`
+2. Run `bash scripts/update_docs_index.sh` from the IATI.cloud root directory. Or do it manually with:
+
+```bash
+cat README.md ./docs/*.md > ./docs/combined.md
+pandoc -s --metadata title="IATI.cloud Documentation" -o ./docs/index.html ./docs/combined.md
+rm ./docs/combined.md
+```
+
+Ensure this is pushed to the correct branch or change the branch on [github -> settings -> pages](https://github.com/zimmerman-team/IATI.cloud/settings/pages).

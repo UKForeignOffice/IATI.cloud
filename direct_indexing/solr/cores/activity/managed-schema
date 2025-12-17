@@ -1171,6 +1171,7 @@
 
   <!-- FCDO Document link combined categories -->
   <field name="document-link.category-codes-combined" type="text_general" multiValued="true" indexed="true" required="false" stored="true"/>
+  <field name="related_activity_context" type="text_general_single" multiValued="false" indexed="true" required="false" stored="true"/>
 
   <!-- Dynamic fields -->
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>

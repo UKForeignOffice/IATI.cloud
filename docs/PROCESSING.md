@@ -33,7 +33,7 @@ Latstly, we [extract the subtypes (budget, result and transactions)](#extracting
 
 #### Cleaning
 
-We then recursively clean the dataset. `@` values are removed, `@{http://www.w3.org/XML/1998/namespace}lang` is replaced with `lang`, and key-value fields are extracted. [Read more here](../direct_indexing/cleaning/dataset.py).
+We then recursively clean the dataset. `@` values are removed, `@{http://www.w3.org/XML/1998/namespace}lang` is replaced with `lang`, and key-value fields are extracted. [View the dataset cleaning implementation](../direct_indexing/cleaning/dataset.py).
 
 #### Adding custom fields
 
@@ -53,11 +53,11 @@ We have several "custom fields" that we enrich the IATI data with.
 - [Currency aggregation](../direct_indexing/custom_fields/currency_aggregation.py): We add converted and aggregated values for budgets, disbursements and transactions/transaction subtypes.
 - [Related activity data to parent activity](../direct_indexing/custom_fields/raise_h2_budget_data_to_h1.py): This 'raises' related activity budget data from the H2 activities to the H1 activities.
 
-[Check it out in depth here](../direct_indexing/custom_fields/custom_fields.py)
+[View detailed custom fields implementation](../direct_indexing/custom_fields/custom_fields.py)
 
 #### Extracting subtypes
 
-We extract the subtypes to single valued fields. [Read more here](../direct_indexing/processing/activity_subtypes.py).
+We extract the subtypes to single valued fields. [View the activity subtypes extraction implementation](../direct_indexing/processing/activity_subtypes.py).
 
 Each of these is indexed separately into its respective core.
 

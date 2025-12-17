@@ -24,7 +24,7 @@ The following is split up into two sections. The first is an [installation](#ins
 
 The second part is a [setup](#setup) guide, which explains which steps to take to get your IATI.cloud instance up and running.
 
-Alternatively, you can use docker locally as well. [Read more about our docker setup](./DOCKER.md).
+Alternatively, you can use docker locally as well. [Read the Docker installation and setup guide](./DOCKER.md).
 
 ## Installation of dependencies
 
@@ -62,7 +62,7 @@ sudo apt-get install rabbitmq-server
 sudo systemctl enable rabbitmq-server.service
 ```
 
-[if there are issues with installing rabbitmq](https://computingforgeeks.com/how-to-install-latest-rabbitmq-server-on-ubuntu-linux/)
+[Alternative RabbitMQ installation guide for Ubuntu Linux](https://computingforgeeks.com/how-to-install-latest-rabbitmq-server-on-ubuntu-linux/)
 
 ### Install Solr
 

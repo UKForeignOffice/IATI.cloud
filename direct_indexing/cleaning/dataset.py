@@ -187,3 +187,107 @@ def extract_single_values(add_fields, value, key, data):
             add_fields[f'{key}.{LANG_STR}'] = ' '
 
     return add_fields
+
+
+def clean_known_issues(data):
+    """Known issues:
+    - recipient-org-budget.value = " "
+    - transaction.value-gbp-type = [IF, 0]
+    - transaction.value-usd-type = [IF, 0]
+    - budget.period-start.iso-date: date string formatted as 'YYYY-MM-DD+HH:MM' instead of YYYY-MM-DDTHH:MM:SSZ
+    - result.document-link.document-date.iso-date: date string formatted as 'YYYY-MM-DD+HH:MM' instead of YYYY-MM-DDTHH:MM:SSZ
+    - activity-date.start-planned: date string formatted as 'YYYY-MM-DD+HH:MM' instead of YYYY-MM-DDTHH:MM:SSZ
+    - activity-date.iso-date: date string formatted as 'YYYY-MM-DD+HH:MM' instead of YYYY-MM-DDTHH:MM:SSZ
+
+    Args:
+        data (dict): activity data
+    """
+    # constants to reduce duplicate literals
+    robv = 'recipient-org-budget.value'
+    rob = 'recipient-org-budget'
+    v = 'value'
+    # Fix for recipient-org-budget.value = " "
+    if robv in data and data[robv] == ' ':
+        data[robv] = 0
+    # In case it is not one object
+    if rob in data and v in data[rob] and data[rob][v] == ' ':
+        data[rob][v] = 0
+
+    data = _clean_known_issues_types(data)
+
+    # Fix for malformed date strings
+    date_fields_to_fix = [
+        'budget.period-start.iso-date',
+        'result.document-link.document-date.iso-date',
+        'activity-date.start-planned',
+        'activity-date.iso-date',
+    ]
+    for field in date_fields_to_fix:
+        if field in data:
+            value = data[field]
+            if isinstance(value, list):
+                data[field] = [_reformat_date_str(d) for d in value]
+            else:
+                data[field] = _reformat_date_str(value)
+
+    data = _clean_known_issues_dates(data)
+    return data
+
+
+def _clean_known_issues_types(data):
+    # Fix for transaction.value-gbp-type and transaction.value-usd-type
+    for field in ['transaction.value-gbp-type', 'transaction.value-usd-type']:
+        if field in data and isinstance(data[field], list):
+            # Per instructions, replace any values not in range(1, 14) with 1.
+            # Valid transaction type codes are integers from 1 to 13.
+            data[field] = _fix_ints(data, field)
+    return data
+
+
+def _fix_ints(data, field):
+    cleaned_list = []
+    for item in data[field]:
+        if not isinstance(item, int):
+            try:
+                item = int(item)
+            except Exception:
+                pass
+        if isinstance(item, int) and 1 <= item <= 13:
+            cleaned_list.append(item)
+        else:
+            cleaned_list.append(1)
+    return cleaned_list
+
+
+def _reformat_date_str(date_str):
+    # Fix for date strings like 'YYYY-MM-DD+HH:MM' by replacing '+' with 'T'.
+    # This converts it to a valid ISO 8601 format.
+    # We check for 'T' not in string to avoid re-formatting strings that
+    # already have a time designator and a timezone offset (e.g. '...T...+...').
+    if isinstance(date_str, str) and '+' in date_str and 'T' not in date_str:
+        return date_str.replace('+', 'T', 1)
+    return date_str
+
+
+def _clean_known_issues_dates(data):
+    if 'budget' in data and 'period-start' in data['budget'] and 'iso-date' in data['budget']['period-start']:
+        value = data['budget']['period-start']['iso-date']
+        if isinstance(value, list):
+            data['budget']['period-start']['iso-date'] = [_reformat_date_str(d) for d in value]
+        else:
+            data['budget']['period-start']['iso-date'] = _reformat_date_str(value)
+
+    if 'result' in data and 'document-link' in data['result'] and 'document-date' in data['result']['document-link'] and 'iso-date' in data['result']['document-link']['document-date']:  # NOQA: E501
+        value = data['result']['document-link']['document-date']['iso-date']
+        if isinstance(value, list):
+            data['result']['document-link']['document-date']['iso-date'] = [_reformat_date_str(d) for d in value]
+        else:
+            data['result']['document-link']['document-date']['iso-date'] = _reformat_date_str(value)
+
+    if 'activity-date' in data and 'iso-date' in data['activity-date']:
+        value = data['activity-date']['iso-date']
+        if isinstance(value, list):
+            data['activity-date']['iso-date'] = [_reformat_date_str(d) for d in value]
+        else:
+            data['activity-date']['iso-date'] = _reformat_date_str(value)
+    return data
