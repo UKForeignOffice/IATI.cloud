@@ -12,6 +12,10 @@ from direct_indexing.metadata.util import download_dataset, retrieve
 from direct_indexing.processing import dataset as dataset_processing
 
 INDEX_SUCCESS = 'Successfully indexed'
+DS_INVALID = 'Dataset invalid'
+DS_NOT_INDEXED = 'Dataset was not indexed'
+DS_PATH = 'data_sources/datasets/iati-data-main'
+ERR_MSG_DEL = 'Apologies, but the dataset could not be fully deleted, please contact support'
 
 
 class DatasetException(Exception):
@@ -24,12 +28,12 @@ def subtask_process_dataset(dataset, update):
     dataset_indexing_result, result, should_retry = dataset_processing.fun(dataset, update)
     if result == INDEX_SUCCESS and dataset_indexing_result == INDEX_SUCCESS:
         return result
-    elif dataset_indexing_result == 'Dataset invalid':
+    elif dataset_indexing_result == DS_INVALID:
         return dataset_indexing_result
     elif should_retry:
         raise subtask_process_dataset.retry(countdown=60, max_retries=2, exc=DatasetException(message=f'Error indexing dataset {dataset["id"]}\nDataset metadata:\n{result}\nDataset indexing:\n{str(dataset_indexing_result)}'))  # NOQA
     else:
-        return "Dataset was not indexed"
+        return DS_NOT_INDEXED
         # commented to prevent false positive exceptions. raise DatasetException(message=f'Error indexing dataset {dataset["id"]}\nDataset metadata:\n{result}\nDataset indexing:\n{str(dataset_indexing_result)}')  # NOQA
 
 
@@ -45,10 +49,10 @@ def aida_index_dataset(dataset, publisher, dataset_name, dataset_url, draft=Fals
     dataset_indexing_result, result, _ = dataset_processing.fun(dataset, update=True, draft=draft)
     if result == INDEX_SUCCESS and dataset_indexing_result == INDEX_SUCCESS:
         return result, 200
-    elif dataset_indexing_result == 'Dataset invalid':
+    elif dataset_indexing_result == DS_INVALID:
         return dataset_indexing_result, 200
     else:
-        return "Dataset was not indexed", 200
+        return DS_NOT_INDEXED, 200
 
 
 def _aida_download(publisher, dataset_name, dataset_url, dataset):
@@ -56,9 +60,8 @@ def _aida_download(publisher, dataset_name, dataset_url, dataset):
     base_path = os.path.abspath(os.path.join(
         os.path.dirname(__file__),
         '..',
-        'data_sources/datasets/iati-data-main'
+        DS_PATH
     ))
-    logging.info("BASE PATH: %s", base_path)
     publisher_path = os.path.join(base_path, "data", publisher)
     os.makedirs(publisher_path, exist_ok=True)
     # download the file to the publisher path
@@ -78,9 +81,8 @@ def _aida_download(publisher, dataset_name, dataset_url, dataset):
     metadata_base_path = os.path.abspath(os.path.join(
         os.path.dirname(__file__),
         '..',
-        'data_sources/datasets/iati-data-main'
+        DS_PATH
     ))
-    logging.info("BASE PATH: %s", metadata_base_path)
     metadata_publisher_path = os.path.join(metadata_base_path, "metadata", publisher)
     os.makedirs(metadata_publisher_path, exist_ok=True)
     metadata_path = os.path.join(metadata_publisher_path, f"{dataset_name}.json")
@@ -112,7 +114,7 @@ def aida_drop_dataset(dataset_id, draft=False):
             return "Multiple datasets found with this id, please contact support", 500
         solr.delete(q=f'id:"{dataset_id}"')
     except pysolr.SolrError:
-        return "Apologies, but the dataset could not be fully deleted, please contact support", 500
+        return ERR_MSG_DEL, 500
 
     try:
         core_list = ['activity', 'transaction', 'result', 'budget', 'budget_split_by_sector', 'organisation',
@@ -126,7 +128,7 @@ def aida_drop_dataset(dataset_id, draft=False):
             if len(find_data) > 0:
                 solr.delete(q=f'dataset.id:"{dataset_id}"')
     except pysolr.SolrError:
-        return "Apologies, but the dataset could not be fully deleted, please contact support", 500
+        return ERR_MSG_DEL, 500
 
     return "Dataset deleted successfully", 200
 
@@ -161,7 +163,7 @@ def fcdo_drop_dataset(ds_id):
             }
             solr.add([update_data])
     except pysolr.SolrError:
-        return "Apologies, but the dataset could not be fully deleted, please contact support", 500
+        return ERR_MSG_DEL, 500
     return "Dataset deleted successfully", 200
 
 
@@ -197,7 +199,7 @@ def fcdo_reindex_dataset(ds_id, url):
         try:
             fcdo_reindex_dataset_download(url, resource_url, org_name, dataset_name)
         except requests.exceptions.RequestException as e:
-            return f"Failed to download dataset {dataset_name}.", 500
+            return f"Failed to download dataset {dataset_name}. Because of:\n{e}", 500
         try:
             dataset = fcdo_reindex_dataset_metadata(org_name, dataset_name)
         except Exception:
@@ -205,10 +207,10 @@ def fcdo_reindex_dataset(ds_id, url):
         dataset_indexing_result, result, _ = dataset_processing.fun(dataset, update=True)
         if result == INDEX_SUCCESS and dataset_indexing_result == INDEX_SUCCESS:
             return result, 200
-        elif dataset_indexing_result == 'Dataset invalid':
+        elif dataset_indexing_result == DS_INVALID:
             return dataset_indexing_result, 200
         else:
-            return "Dataset was not indexed", 200
+            return DS_NOT_INDEXED, 200
     except pysolr.SolrError:
         return "Apologies, but the dataset could not be reindexed, please contact support", 500
     except Exception:
@@ -221,9 +223,8 @@ def fcdo_reindex_dataset_download(url, resource_url, org_name, dataset_name):
     base_path = os.path.abspath(os.path.join(
         os.path.dirname(__file__),
         '..',
-        'data_sources/datasets/iati-data-main'
+        DS_PATH
     ))
-    logging.info("BASE PATH: %s", base_path)
     publisher_path = os.path.join(base_path, "data", org_name)
     file_path = os.path.join(publisher_path, f"{dataset_name}.xml")
     response = requests.get(dl_url, stream=True)
@@ -238,9 +239,8 @@ def fcdo_reindex_dataset_metadata(org_name, dataset_name):
     metadata_base_path = os.path.abspath(os.path.join(
         os.path.dirname(__file__),
         '..',
-        'data_sources/datasets/iati-data-main'
+        DS_PATH
     ))
-    logging.info("BASE PATH: %s", metadata_base_path)
     metadata_publisher_path = os.path.join(metadata_base_path, "metadata", org_name)
     os.makedirs(metadata_publisher_path, exist_ok=True)
     metadata_path = os.path.join(metadata_publisher_path, f"{dataset_name}.json")

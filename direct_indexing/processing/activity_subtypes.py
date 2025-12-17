@@ -8,6 +8,15 @@ from django.conf import settings
 from direct_indexing.custom_fields.indexing_manytomany_relations import index_many_to_many_relations
 from direct_indexing.processing.subtypes_util import COUNTRIES, REGIONS, set_default_percentage
 
+
+ADCS = 'activity-date.common.start'
+ADCE = 'activity-date.common.end'
+DS_ID = 'dataset.id'
+DS_NAME = 'dataset.name'
+DS_HASH = 'dataset.resources.hash'
+DS_VER = 'dataset.extras.iati_version'
+BVU = 'budget.value-usd'
+TVU = 'transaction.value-usd'
 AVAILABLE_SUBTYPES = {
     'transaction': settings.SOLR_TRANSACTION_URL,
     'budget': settings.SOLR_BUDGET_URL,
@@ -165,7 +174,7 @@ def _trim_transactions(transactions):
             hier = t.get('hierarchy', None)
             iati_id = t.get('iati-identifier', None)
             transaction = _trim_transaction_obj(t.get('transaction', None))
-            transaction_value_usd = t.get('transaction.value-usd', None)
+            transaction_value_usd = t.get(TVU, None)
             recipient_country = _trim_field(t.get('recipient-country', None), ['code'])
             reporting_org = _trim_field(t.get('reporting-org', None),
                                         ['ref', 'type', 'narrative', 'secondary-reporter'])
@@ -175,8 +184,8 @@ def _trim_transactions(transactions):
             activity_date_start_actual = t.get('activity-date.start-actual', None)
             activity_date_end_planned = t.get('activity-date.end-planned', None)
             activity_date_end_actual = t.get('activity-date.end-actual', None)
-            activity_date_common_start = t.get('activity-date.common.start', None)
-            activity_date_common_end = t.get('activity-date.common.end', None)
+            activity_date_common_start = t.get(ADCS, None)
+            activity_date_common_end = t.get(ADCE, None)
             tag = _trim_field(t.get('tag', None), ['code', 'vocabulary', 'narrative'])
             activity_scope = t.get('activity-scope', None)
             document_link = _trim_field(t.get('document-link', None), ['category'])
@@ -194,17 +203,17 @@ def _trim_transactions(transactions):
             title = _trim_field(t.get('title', None), ['narrative'])
             recipient_country_name = t.get('recipient-country.name', None)
             recipient_region_name = t.get('recipient-region.name', None)
-            dataset_id = t.get('dataset.id', None)
-            dataset_name = t.get('dataset.name', None)
-            dataset_resources_hash = t.get('dataset.resources.hash', None)
-            dataset_extras_iati_version = t.get('dataset.extras.iati_version', None)
+            dataset_id = t.get(DS_ID, None)
+            dataset_name = t.get(DS_NAME, None)
+            dataset_resources_hash = t.get(DS_HASH, None)
+            dataset_extras_iati_version = t.get(DS_VER, None)
             _trimmed = {
                 'last-updated-datetime': lud,
                 'default-currency': dc,
                 'hierarchy': hier,
                 'iati-identifier': iati_id,
                 'transaction': transaction,
-                'transaction.value-usd': transaction_value_usd,
+                TVU: transaction_value_usd,
                 'recipient-country': recipient_country,
                 'reporting-org': reporting_org,
                 'reporting-org.type.name': reporting_org_type_name,
@@ -213,8 +222,8 @@ def _trim_transactions(transactions):
                 'activity-date.start-actual': activity_date_start_actual,
                 'activity-date.end-planned': activity_date_end_planned,
                 'activity-date.end-actual': activity_date_end_actual,
-                'activity-date.common.start': activity_date_common_start,
-                'activity-date.common.end': activity_date_common_end,
+                ADCS: activity_date_common_start,
+                ADCE: activity_date_common_end,
                 'tag': tag,
                 'activity-scope': activity_scope,
                 'document-link': document_link,
@@ -232,10 +241,10 @@ def _trim_transactions(transactions):
                 'title': title,
                 'recipient-country.name': recipient_country_name,
                 'recipient-region.name': recipient_region_name,
-                'dataset.id': dataset_id,
-                'dataset.name': dataset_name,
-                'dataset.resources.hash': dataset_resources_hash,
-                'dataset.extras.iati_version': dataset_extras_iati_version,
+                DS_ID: dataset_id,
+                DS_NAME: dataset_name,
+                DS_HASH: dataset_resources_hash,
+                DS_VER: dataset_extras_iati_version,
             }
             # remove the empty fields from trimmed
             trimmed = {k: v for k, v in _trimmed.items() if v is not None}
@@ -308,7 +317,7 @@ def _trim_budgets(budgets):
         sector = _trim_field(b.get('sector', None), ['code', 'vocabulary'])
         recipient_country = _trim_field(b.get('recipient-country', None), ['code'])
         budget = b.get('budget', None)
-        budget_value_usd = b.get('budget.value-usd', None)
+        budget_value_usd = b.get(BVU, None)
         budget_year = _get_budget_year(budget)
         reporting_org = _trim_field(b.get('reporting-org', None), ['ref', 'type', 'secondary-reporter'])
         activity_status = _trim_field(b.get('activity-status', None), ['code'])
@@ -317,10 +326,10 @@ def _trim_budgets(budgets):
         hier = b.get('hierarchy', None)
         humanitarian_scope = _trim_field(b.get('humanitarian-scope', None), ['type', 'vocabulary'])
         hum = b.get('humanitarian', None)
-        dataset_id = b.get('dataset.id', None)
-        dataset_name = b.get('dataset.name', None)
-        dataset_resources_hash = b.get('dataset.resources.hash', None)
-        dataset_extras_iati_version = b.get('dataset.extras.iati_version', None)
+        dataset_id = b.get(DS_ID, None)
+        dataset_name = b.get(DS_NAME, None)
+        dataset_resources_hash = b.get(DS_HASH, None)
+        dataset_extras_iati_version = b.get(DS_VER, None)
         other_identifier = _trim_field(b.get('other-identifier', None), ['type'])
         tag = _trim_field(b.get('tag', None), ['code', 'vocabulary'])
         default_aid_type = b.get('default-aid-type', None)
@@ -337,7 +346,7 @@ def _trim_budgets(budgets):
             'sector': sector,
             'recipient-country': recipient_country,
             'budget': budget,
-            'budget.value-usd': budget_value_usd,
+            BVU: budget_value_usd,
             'budget.year': budget_year,
             'reporting-org': reporting_org,
             'activity-status': activity_status,
@@ -346,10 +355,10 @@ def _trim_budgets(budgets):
             'hierarchy': hier,
             'humanitarian-scope': humanitarian_scope,
             'humanitarian': hum,
-            'dataset.id': dataset_id,
-            'dataset.name': dataset_name,
-            'dataset.resources.hash': dataset_resources_hash,
-            'dataset.extras.iati_version': dataset_extras_iati_version,
+            DS_ID: dataset_id,
+            DS_NAME: dataset_name,
+            DS_HASH: dataset_resources_hash,
+            DS_VER: dataset_extras_iati_version,
             'other-identifier': other_identifier,
             'tag': tag,
             'default-aid-type': default_aid_type,
@@ -392,7 +401,7 @@ def _split_budgets(budgets):
             # create a copy of the budget and add the distributed budget to it
             _budget = deepcopy(budget)
             _budget['budget']['value'] = distributed_budget['amount']
-            _budget['budget.value-usd'] = distributed_budget['amount_usd']
+            _budget[BVU] = distributed_budget['amount_usd']
             _budget['sector'] = distributed_budget['sector']
             # drop any empty fields, for example budget.value-usd: None in some cases
             _budget = {k: v for k, v in _budget.items() if v is not None}
@@ -411,7 +420,7 @@ def _distribute_budget(budget, sector):
         list: a list of distributed budgets
     """
     budget_value = budget.get('budget', {}).get('value', 0)
-    budget_value_usd = budget.get('budget.value-usd', None)
+    budget_value_usd = budget.get(BVU, None)
     if not sector:
         return None
     sector_list = sector or [{'code': '', 'percentage': 100}]
@@ -518,7 +527,7 @@ def _split_transaction(transaction, _transactions):
         _transaction['is-sdg'] = is_sdg
         _transaction['is-sdg.source'] = distributed_transaction['is_sdg_source']
         _transaction['transaction']['value'] = distributed_transaction['amount']
-        _transaction['transaction.value-usd'] = distributed_transaction['amount_usd']
+        _transaction[TVU] = distributed_transaction['amount_usd']
         if recip_code in COUNTRIES:
             _transaction['recipient-country'] = {'code': recip_code}
         if recip_code in REGIONS:
@@ -543,7 +552,7 @@ def _distribute_transaction(transaction, recipient, sector, tag):
     """
     try:
         transaction_value = transaction.get('transaction', {}).get('value', 0)
-        transaction_value_usd = transaction.get('transaction.value-usd', None)
+        transaction_value_usd = transaction.get(TVU, None)
         distributed_transactions = []
         if not recipient and not sector:
             # drop the percentage as we do not store it
@@ -621,7 +630,7 @@ def _trim_sdg_item(item):
     try:
         _item = deepcopy(item)
         for key in item:
-            if key in ["last-updated-datetime", 'activity-date.common.start', 'activity-date.common.end',
+            if key in ["last-updated-datetime", ADCS, ADCE,
                        "reporting-org.type.name"]:
                 del _item[key]
         _trim_sdg_item_transaction(_item['transaction'])
