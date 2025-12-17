@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Import utility functions
 source ./scripts/util.sh
 
