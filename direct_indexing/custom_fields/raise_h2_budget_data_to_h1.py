@@ -15,6 +15,30 @@ def raise_h2_budget_data_to_h1(data):
     return data
 
 
+def pull_related_id_title_description(id_title_description, activity):
+    if id_title_description != "":
+        id_title_description += " \n "
+
+    _id = activity.get('iati-identifier', '')
+    _title = activity.get('title', {}).get('narrative', [])
+    if isinstance(_title, list):
+        _title = ". ".join(_title)
+    # Get the descriptions, can be 1..* with 1..* narratives
+    _descriptions = activity.get('description', [])
+    if not isinstance(_descriptions, list):
+        _descriptions = [_descriptions]
+    _description = []
+    for _desc in _descriptions:
+        _desc = _desc.get('narrative', [])
+        if isinstance(_desc, list):
+            _desc = ". ".join(_desc)
+        _description.append(_desc)
+    _description = ". ".join(_description)
+
+    id_title_description += f"ID: {_id}\nTitle: {_title}\nDescription: {_description}\n"
+    return id_title_description
+
+
 def pull_related_data_to_h1(data, activity):
     """
     we want to collect the following data:
@@ -33,12 +57,13 @@ def pull_related_data_to_h1(data, activity):
     related_budget_period_end_quarter = []
     related_budget_period_start_iso_date = []
     related_budget_period_end_iso_date = []
+    id_title_description = pull_related_id_title_description("", activity)
 
     related_activity_refs = [rel['ref'] for rel in activity.get('related-activity', []) if 'ref' in rel]
     for _activity in data:
         if 'iati-identifier' in _activity and _activity['iati-identifier'] in related_activity_refs:
+            related_data = True
             if 'budget' in _activity:
-                related_data = True
                 if type(_activity['budget']) is dict:
                     _activity['budget'] = [_activity['budget']]
 
@@ -50,6 +75,7 @@ def pull_related_data_to_h1(data, activity):
 
                 related_budget_period_start_quarter.extend(_activity.get('budget.period-start.quarter', []))
                 related_budget_period_end_quarter.extend(_activity.get('budget.period-end.quarter', []))
+            id_title_description = pull_related_id_title_description(id_title_description, _activity)
 
     return related_data, {
         'related_budget_value': related_budget_value,
@@ -57,4 +83,5 @@ def pull_related_data_to_h1(data, activity):
         'related_budget_period_end_quarter': related_budget_period_end_quarter,
         'related_budget_period_start_iso_date': related_budget_period_start_iso_date,
         'related_budget_period_end_iso_date': related_budget_period_end_iso_date,
+        'related_activity_context': id_title_description,
     }

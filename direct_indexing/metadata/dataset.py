@@ -118,7 +118,7 @@ def aida_drop_dataset(dataset_id, draft=False):
 
     try:
         core_list = ['activity', 'transaction', 'result', 'budget', 'budget_split_by_sector', 'organisation',
-                     'transaction_trimmed', 'transaction_sdgs']
+                     'transaction_trimmed', 'transaction_sdgs', 'fcdo_budget']
         if draft:
             core_list = [f'draft_{core}' for core in core_list]
         for core in core_list:
