@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
+from defusedxml.ElementTree import parse as safe_parse
 from django.conf import settings
 from pysolr import Solr
 from xmljson import badgerfish as bf
@@ -177,9 +178,8 @@ def convert_and_save_xml_to_processed_json(filepath, filetype, codelist, currenc
     :return: The filepath of the json file.
     """
     should_be_indexed = False
-    parser = ET.XMLParser(encoding='utf-8')
     try:
-        etree = ET.parse(filepath, parser=parser)
+        etree = safe_parse(filepath)
         tree = ET.tostring(etree.getroot())
     except ET.ParseError:
         logging.info(f'-- Error parsing {filepath}')
