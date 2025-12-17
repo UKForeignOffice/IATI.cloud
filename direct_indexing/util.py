@@ -7,9 +7,9 @@ import re
 import shutil
 import subprocess
 import urllib.request
-import xml.etree.ElementTree as ET
 
 import pysolr
+from defusedxml.ElementTree import parse as safe_parse
 from django.conf import settings
 
 
@@ -166,8 +166,7 @@ def _download_and_hash_file(url, org, name):
     # Count the activities in file_path
     logging.info("_download_and_hash_file:: count activities")
     activity_count = 0
-    parser = ET.XMLParser(encoding='utf-8')
-    etree = ET.parse(file_path, parser=parser)
+    etree = safe_parse(file_path)
     tree = etree.getroot()
     # Count nodes in tree
     activity_count = len(tree.findall('iati-activity'))
