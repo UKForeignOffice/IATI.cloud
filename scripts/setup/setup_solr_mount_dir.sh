@@ -19,7 +19,7 @@ print_status "Setting up mounted Solr directory..."
 
 if ask_for_confirmation "Do you want to set up a mounted solr directory?"; then
   df -h
-  if [ -f .env ]; then
+  if [[ -f .env ]]; then
     mounted_dir=$(grep -E '^SOLR_VOLUME=' .env | cut -d '=' -f2 | tr -d '"' | sed 's|/solr_data$||')
     echo "Using the value of SOLR_VOLUME in the .env file is: $mounted_dir"
   else

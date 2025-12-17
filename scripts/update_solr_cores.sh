@@ -68,7 +68,7 @@ docker cp $xslt_dir "$solr_container_id:$bitnami_solr/draft_activity/conf/"
 if ask_for_confirmation "Are the files locally mounted (f.ex. on extra mounted volume)?"; then
   df -h
   # Read the .env file and extract the value of SOLR_VOLUME
-  if [ -f .env ]; then
+  if [[ -f .env ]]; then
     mounted_dir=$(grep -E '^SOLR_VOLUME=' .env | cut -d '=' -f2 | tr -d '"' | sed 's|/solr_data$||')
     echo "Using the value of SOLR_VOLUME in the .env file is: $SOLR_VOLUME"
   else
