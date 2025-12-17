@@ -1,6 +1,7 @@
 import os
 import xml.etree.ElementTree as element_tree
 
+from defusedxml.ElementTree import parse as safe_parse
 from django.conf import settings
 
 VALID_VERSIONS = ['2.01', '2.02', '2.03']
@@ -96,9 +97,9 @@ def valid_version_from_file(filepath):
     :param filepath: The path to the dataset file.
     :return: True or False indicating the version being usable.
     """
-    parser = element_tree.XMLParser(encoding='utf-8')
     try:
-        etree = element_tree.parse(filepath, parser=parser)
+        # Use defusedxml to parse safely and guard against entity expansion
+        etree = safe_parse(filepath)
         root = etree.getroot()
         res = False
         if 'version' in root.attrib:

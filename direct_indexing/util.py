@@ -47,10 +47,9 @@ def index_to_core(url, json_path, remove=False):
             solr_out = solr_out[message_index:]
             result = solr_out[:re.search(r'\n', solr_out).start()-1]  # stop at newline excluding the ,
             if remove:
-                os.remove(json_path)
-        else:
-            if remove:
-                os.remove(json_path)  # On success, remove the json file
+                _safe_remove_json_path(json_path)
+        if remove:
+            _safe_remove_json_path(json_path)  # On success, remove the json file
         return result
     except subprocess.CalledProcessError as e:
         result = f'Failed to index due to:\n {e}'
@@ -59,6 +58,25 @@ def index_to_core(url, json_path, remove=False):
     except Exception as e:
         logging.info(f'index_to_core:: Uncaught other exception!! {str(e)}')
         raise
+
+
+def _safe_remove_json_path(json_path):
+    """
+    Remove a json file if it is within the allowed directories.
+
+    :param json_path: The path to the json file to remove
+    :return: None
+    """
+    allowed_dirs = [settings.DATASET_PARENT_PATH]
+    json_path_abs = os.path.abspath(json_path)
+    is_safe = any(
+        os.path.commonpath([json_path_abs, os.path.abspath(allowed_dir)]) == os.path.abspath(allowed_dir)
+        for allowed_dir in allowed_dirs if os.path.exists(os.path.abspath(allowed_dir))
+    )
+    if is_safe and os.path.isfile(json_path_abs):
+        os.remove(json_path_abs)
+    else:
+        logging.warning(f"Refused to remove file outside of safe directories: {json_path_abs}")
 
 
 def datadump_success():
